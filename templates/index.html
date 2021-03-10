@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Repositories</h1>
+  {% for repo in repos %}
+  {{ repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() }}
+  {% endfor %}
+{% endblock %}

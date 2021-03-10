@@ -1,5 +1,5 @@
 [package]
-name = "starsgit"
+name = "mygit"
 version = "0.1.0"
 authors = ["alex wennerberg <alex@alexwennerberg.com>"]
 edition = "2018"
@@ -7,13 +7,14 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-git2 = {version="0.13", default-features = false}
-pico-args = "0.4"
-askama = "0.10"
-pulldown-cmark = "0.8"
-tide = "0.16"
-syntect = {version="4.5", default-features = false, features=["html", "regex-onig"]}
+askama = {version = "0.10", features = ["with-tide"]}
+askama_tide = "0.13"
 async-std = { version = "1.8.0", features = ["attributes"] }
-serde = { version = "1.0", features = ["derive"] }
+git2 = {version="0.13", default-features = false}
 once_cell = "1.7.2"
+pico-args = "0.4"
+pulldown-cmark = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+syntect = {version="4.5", default-features = false, features=["html", "regex-onig"]}
+tide = "0.16"
 toml = "0.5.8"

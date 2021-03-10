@@ -3,6 +3,7 @@
 {% block content %}
   <h1>Repositories</h1>
   {% for repo in repos %}
-  {{ repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() }}
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  <a href="{{name}}">{{ name }}</a> -- description -- 
   {% endfor %}
 {% endblock %}

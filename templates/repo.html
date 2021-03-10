@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Repositories</h1>
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  <h1>{{name}}</h1>
+  Readme text goes here
 {% endblock %}

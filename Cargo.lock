@@ -119,6 +119,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "askama_tide"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12d2cbee67c51e2d2a33fa1988b2416688ffb1428025806a0ca0337d7df4e5da"
+dependencies = [
+ "askama",
+ "tide",
+]
+
+[[package]]
 name = "async-attributes"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1107,6 +1117,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
 
 [[package]]
+name = "mygit"
+version = "0.1.0"
+dependencies = [
+ "askama",
+ "askama_tide",
+ "async-std",
+ "git2",
+ "once_cell",
+ "pico-args",
+ "pulldown-cmark",
+ "serde",
+ "syntect",
+ "tide",
+ "toml",
+]
+
+[[package]]
 name = "nb-connect"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1616,22 +1643,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2beb4d1860a61f571530b3f855a1b538d0200f7871c63331ecd6f17b1f014f8"
 dependencies = [
  "version_check",
-]
-
-[[package]]
-name = "starsgit"
-version = "0.1.0"
-dependencies = [
- "askama",
- "async-std",
- "git2",
- "once_cell",
- "pico-args",
- "pulldown-cmark",
- "serde",
- "syntect",
- "tide",
- "toml",
 ]
 
 [[package]]

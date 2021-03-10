@@ -1625,11 +1625,13 @@ dependencies = [
  "askama",
  "async-std",
  "git2",
+ "once_cell",
  "pico-args",
  "pulldown-cmark",
  "serde",
  "syntect",
  "tide",
+ "toml",
 ]
 
 [[package]]

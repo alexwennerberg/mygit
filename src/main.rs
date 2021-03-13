@@ -2,10 +2,11 @@ use askama::Template;
 use git2::Repository;
 use once_cell::sync::OnceCell;
 use pico_args;
+use pulldown_cmark::{html, Options, Parser};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use std::time::Instant;
+use std::str;
 use tide::prelude::*;
 use tide::Request;
 
@@ -50,7 +51,7 @@ async fn index(req: Request<()>) -> tide::Result {
 #[derive(Template)]
 #[template(path = "repo.html")] // using the template in this path, relative
 struct RepoHomeTemplate<'a> {
-    repo: Repository,
+    repo: &'a Repository,
     readme_text: &'a str,
     config: &'a Config,
 }
@@ -60,9 +61,15 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     let repo_path = Path::new(&config.repo_directory).join(req.param("repo_name")?);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     let repo = Repository::open(repo_path)?;
+    let readme = &repo.revparse_single("HEAD:README.md")?; // TODO allow more incl plaintext
+    let markdown_input = str::from_utf8(readme.as_blob().unwrap().content())?;
+    let mut options = Options::empty();
+    let parser = Parser::new_ext(markdown_input, options);
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
     let tmpl = RepoHomeTemplate {
-        repo,
-        readme_text: "Hello world",
+        repo: &repo,
+        readme_text: &html_output,
         config,
     };
     Ok(tmpl.into())

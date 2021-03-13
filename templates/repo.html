@@ -2,6 +2,6 @@
 
 {% block content %}
   {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
-  <h1>{{name}}</h1>
+  {% include "repo-navbar.html" %}
   Readme text goes here
 {% endblock %}

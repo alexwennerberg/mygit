@@ -1,18 +1,19 @@
-use tide::Request;
 use askama::Template;
-use tide::prelude::*;
+use git2::Repository;
+use once_cell::sync::OnceCell;
+use pico_args;
+use serde::{Deserialize, Serialize};
+use std::fs;
 use std::path::Path;
 use std::time::Instant;
-use once_cell::sync::OnceCell;
-use std::fs;
-use serde::{Serialize, Deserialize};
-use pico_args;
-use git2::Repository;
+use tide::prelude::*;
+use tide::Request;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
     port: i32, // should be u8
-    repo_directory: String
+    repo_directory: String,
+    emoji_favicon: String,
 }
 
 static CONFIG: OnceCell<Config> = OnceCell::new();
@@ -21,42 +22,48 @@ impl Config {
     pub fn global() -> &'static Config {
         CONFIG.get().expect("Config is not initialized")
     }
-
 }
 
-#[derive(Template)] 
+#[derive(Template)]
 #[template(path = "index.html")] // using the template in this path, relative
-struct IndexTemplate { 
-    repos: Vec<Repository>
+struct IndexTemplate<'a> {
+    repos: Vec<Repository>,
+    config: &'a Config,
 }
 
 async fn index(req: Request<()>) -> tide::Result {
-    let repos = &Config::global().repo_directory;
+    let config = &Config::global();
+    let repos = &config.repo_directory;
     let paths = fs::read_dir(repos)?;
-    let mut index_template = IndexTemplate{
-        repos:  vec![]
+    let mut index_template = IndexTemplate {
+        repos: vec![],
+        config: config,
     }; // TODO replace with map/collect
     for path in paths {
         let repo = Repository::open(path?.path())?;
         index_template.repos.push(repo);
     }
+
     Ok(index_template.into())
 }
 
-#[derive(Template)] 
+#[derive(Template)]
 #[template(path = "repo.html")] // using the template in this path, relative
-struct RepoHomeTemplate<'a> { 
+struct RepoHomeTemplate<'a> {
     repo: Repository,
-    readme_text: &'a str
+    readme_text: &'a str,
+    config: &'a Config,
 }
 
 async fn repo_home(req: Request<()>) -> tide::Result {
-    let repo_path = Path::new(&Config::global().repo_directory).join(req.param("repo_name")?);
+    let config = &Config::global();
+    let repo_path = Path::new(&config.repo_directory).join(req.param("repo_name")?);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     let repo = Repository::open(repo_path)?;
     let tmpl = RepoHomeTemplate {
-        repo: repo,
-        readme_text: "Hello world"
+        repo,
+        readme_text: "Hello world",
+        config,
     };
     Ok(tmpl.into())
 }
@@ -70,7 +77,6 @@ OPTIONS:
   -c                    Path to config file
 ";
 
-
 #[async_std::main]
 async fn main() -> Result<(), std::io::Error> {
     let mut pargs = pico_args::Arguments::from_env();
@@ -81,7 +87,7 @@ async fn main() -> Result<(), std::io::Error> {
     }
 
     // TODO cli
- 
+
     let toml_text = fs::read_to_string("mygit.toml")?;
     let config: Config = toml::from_str(&toml_text)?;
     CONFIG.set(config).unwrap();
@@ -89,9 +95,18 @@ async fn main() -> Result<(), std::io::Error> {
     tide::log::start();
     let mut app = tide::new();
     app.at("/").get(index);
+    app.at("/robots.txt")
+        .serve_file("templates/static/robots.txt")?; // TODO configurable
+    app.at("/style.css")
+        .serve_file("templates/static/style.css")?; // TODO configurable
     app.at("/:repo_name").get(repo_home);
-    app.at("/:repo_name/log").get(repo_log);
-    // app.at("/:repo_name/:commit/tree").get(repo_log);
+    // ALSO do git pull at this url somehow ^
+    // app.at("/:repo_name/commit/:hash").get(repo_log);
+    // app.at("/:repo_name/log/:ref").get(repo_log); ref optional, default master/main
+    // app.at("/:repo_name/tree/:ref").get(repo_log); ref = master/main when not present
+    // app.at("/:repo_name/tree/:ref/item/:file").get(repo_log); ref = master/main when not present
+    // app.at("/:repo_name/refs").get(repo_log); ref = master/main when not present
+    // Bonus: raw files, patchsets
     app.listen("127.0.0.1:8081").await?;
     Ok(())
 }

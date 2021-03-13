@@ -1,0 +1,37 @@
+body {
+  max-width: 90ch;
+  padding: 2ch;
+  margin: auto;
+  font-family: "Roboto", Helvetica, Arial, Sans-serif;
+  word-wrap: break-word;
+  background-color: white;
+  line-height: 1.5;
+}
+
+.repo-last-updated {
+  font-style: italic;
+}
+
+.repo-link {
+  font-family: "Roboto Mono", monospace;
+  font-size: 1.2rem;
+}
+
+.repo-listing {
+  background-color: #f0f0f0;
+  padding: .3rem;
+  margin-bottom: .5rem;
+}
+
+.footer {
+  text-align: center;
+  font-style: italic;
+  font-size: .9rem;
+}
+
+hr.thin {
+  border: 0;
+  height: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}

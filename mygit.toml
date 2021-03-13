@@ -1,0 +1,5 @@
+port = 8081
+# Directory to store git repos
+repo_directory = "repos"
+emoji_favicon = "💻"
+page_title = "My git repositories"

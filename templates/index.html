@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Repositories</h1>
+  <div class="page-title"><h1>Repositories</h1></div>
+  <h2>Subheading</h2>
   {% for repo in repos %}
   {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
-  <a href="{{name}}">{{ name }}</a> -- description -- 
+  <div class="repo-listing">
+  <div class="repo-link"><a href="{{name}}">{{ name }}</a></div> 
+  <div class="repo-description">a cool repository</div>
+  <div class="repo-last-updated">updated 2021-02-01</div>
+  </div>
   {% endfor %}
 {% endblock %}

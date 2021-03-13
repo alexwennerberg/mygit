@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>{{config.emoji_favicon}}</text></svg>">
+    <meta name="description" content="My self-hosted git repositories">
     <title>{% block title %}My Site{% endblock %}</title>
     {% block head %}{% endblock %}
   </head>
@@ -8,5 +13,9 @@
     <div id="content">
       {% block content %}{% endblock %}
     </div>
+  <hr class = "thin">
+  <div class="footer">
+  Server running <a href="git.alexwennerberg.com/mygit">mygit</a>
+  </div>
   </body>
 </html>

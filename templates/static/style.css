@@ -14,13 +14,6 @@ body {
 
 .repo-link {
   font-family: "Roboto Mono", monospace;
-  font-size: 1.2rem;
-}
-
-.repo-listing {
-  background-color: #f0f0f0;
-  padding: .3rem;
-  margin-bottom: .5rem;
 }
 
 .footer {
@@ -47,4 +40,38 @@ h1 {
 }
 h2 {
    margin: 0px;
+}
+
+table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+pre {
+    line-height: 1.2;
+    font-size: 1rem;
+    overflow: auto;
+}
+
+tr:hover {
+  background-color: #f0f0f0;
+}
+
+td {
+  margin: 0px;
+  border-style:hidden;
+  padding: 0;
+}
+table {
+  border-collapse: collapse;
+}
+
+@media only screen and (max-width: 600px) {
+  body {
+    font-size: 16px;
+  }
+
+  .repo-description, .repo-last-updated {
+    display: none;
+  }
 }

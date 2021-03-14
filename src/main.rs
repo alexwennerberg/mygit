@@ -13,7 +13,7 @@ use tide::Request;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    port: i32, // should be u8
+    port: u16,
     repo_directory: String,
     emoji_favicon: String,
 }

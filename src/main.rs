@@ -39,7 +39,12 @@ async fn index(req: Request<()>) -> tide::Result {
         .map(|entries| {
             entries
                 .filter_map(|entry| Some(entry.ok()?.path()))
-                // TODO check for git-daemon-export-ok file
+                .filter(|entry| {
+                    // check for the export file
+                    let mut path = entry.clone();
+                    path.push("git-daemon-export-ok");
+                    path.exists()
+                })
                 .filter_map(|entry| Repository::open(entry).ok())
                 .collect::<Vec<_>>()
         })

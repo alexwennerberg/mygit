@@ -10,7 +10,7 @@
     {% let summary = commit.summary().unwrap_or("")|truncate(72) %}
     <td>{{summary}}</td>
     <td><a href="mailto:{{commit.author().email().unwrap_or("")}}">{{commit.author().name().unwrap_or("")}}</a></td>
-    <td>{{commit.time().seconds()|iso_date}}</td>
+    <td>{{commit.time()|format_datetime("%Y-%m-%d")}}</td>
   </tr>
   {% endfor %}
   </table>

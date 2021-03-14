@@ -201,11 +201,11 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
     Ok(tmpl.into())
 }
 mod filters {
-    pub fn iso_date(i: &i64) -> ::askama::Result<String> {
-        // UTC date
-        let datetime: chrono::DateTime<chrono::Utc> =
-            chrono::DateTime::from_utc(chrono::NaiveDateTime::from_timestamp(*i, 0), chrono::Utc);
-        Ok(datetime.format("%Y-%m-%d").to_string())
+    pub fn format_datetime(time: &git2::Time, format: &str) -> ::askama::Result<String> {
+        use chrono::{FixedOffset, TimeZone};
+        let offset = FixedOffset::west(time.offset_minutes() * 60);
+        let datetime = offset.timestamp(time.seconds(), 0);
+        Ok(datetime.format(format).to_string())
     }
 
     pub fn unix_perms(m: &i32) -> ::askama::Result<String> {

@@ -9,7 +9,7 @@
   <br>
   <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
   <br>
-  <b>Date:</b> {{commit.time().seconds()}}
+  <b>Date:</b> {{commit.time()|format_datetime("%c %z")}}
   <br>
   {% let stats = diff.stats().unwrap() %}
   {{stats.files_changed()}} files changed; {{stats.insertions()}} insertions {{stats.deletions()}} deletions

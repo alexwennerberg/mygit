@@ -246,7 +246,10 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
     };
     Ok(tmpl.into())
 }
+
 mod filters {
+    use super::*;
+
     pub fn format_datetime(time: &git2::Time, format: &str) -> ::askama::Result<String> {
         use chrono::{FixedOffset, TimeZone};
         let offset = FixedOffset::west(time.offset_minutes() * 60);
@@ -281,6 +284,16 @@ mod filters {
         }
         output[i] = 0x2d; // -
         return Ok(std::str::from_utf8(&output).unwrap().to_owned());
+    }
+
+    pub fn repo_name(repo: &Repository) -> askama::Result<&str> {
+        repo.workdir()
+            // use the path for bare repositories
+            .unwrap_or_else(|| repo.path())
+            .file_name()
+            .unwrap()
+            .to_str()
+            .ok_or(askama::Error::Fmt(std::fmt::Error))
     }
 }
 

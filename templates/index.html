@@ -6,9 +6,8 @@
   <div style=>
   <table>
   {% for repo in repos %}
-  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
   <tr>
-    <td class="repo-link"><a href="{{name}}">{{ name }}</a></td>
+    <td class="repo-link"><a href="{{repo|repo_name|urlencode_strict}}">{{repo|repo_name}}</a></td>
     <td class="repo-description">a cool repository</td>
     <td class="repo-last-updated">updated 2021-02-01</td>
   </tr>

@@ -257,7 +257,8 @@ async fn main() -> Result<(), std::io::Error> {
 
     // TODO cli
 
-    let toml_text = fs::read_to_string("mygit.toml")?;
+    let toml_text =
+        fs::read_to_string("mygit.toml").expect("expected configuration file mygit.toml");
     let config: Config = toml::from_str(&toml_text)?;
     CONFIG.set(config).unwrap();
 

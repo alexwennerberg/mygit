@@ -6,7 +6,7 @@
   <table>
   {% for commit in commits %} 
   <tr>
-    <td class="commit-hash"><a href="/{{name}}/commits/{{commit.id()}}">{{commit.id().to_string()[..7]}}</td>
+    <td class="commit-hash"><a href="/{{name}}/commit/{{commit.id()}}">{{commit.id().to_string()[..7]}}</td>
     {% let summary = commit.summary().unwrap_or("")|truncate(72) %}
     <td>{{summary}}</td>
     <td><a href="mailto:{{commit.author().email().unwrap_or("")}}">{{commit.author().name().unwrap_or("")}}</a></td>

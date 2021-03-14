@@ -12,8 +12,12 @@ body {
   font-style: italic;
 }
 
-.repo-link, .git-reference, .permissions {
+.repo-link, .git-reference, .permissions, .commit-hash, .commit-message{
   font-family: "Roboto Mono", monospace;
+}
+
+.commit-hash {
+  display: inline
 }
 
 .footer {

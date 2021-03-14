@@ -1,6 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Reference, Repository, Tree, TreeEntry};
+use git2::{Commit, Diff, DiffDelta, DiffFormat, Oid, Reference, Repository, Tree, TreeEntry};
 use once_cell::sync::OnceCell;
 use pico_args;
 use pulldown_cmark::{html, Options, Parser};
@@ -151,9 +151,8 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
     let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     // TODO accept reference or commit id
-    let commit = match req.param("ref") {
-        _ => repo.revparse_single("HEAD")?.peel_to_commit()?,
-    };
+    let spec = req.param("ref").unwrap_or("HEAD");
+    let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
     let tmpl = RepoTreeTemplate {
         repo: &repo,
@@ -163,6 +162,43 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
     Ok(tmpl.into())
 }
 
+#[derive(Template)]
+#[template(path = "commit.html")] // using the template in this path, relative
+struct RepoCommitTemplate<'a> {
+    repo: &'a Repository,
+    config: &'a Config,
+    commit: Commit<'a>,
+    parent: Commit<'a>,
+    diff: &'a Diff<'a>,
+    deltas: Vec<DiffDelta<'a>>,
+}
+
+async fn repo_commit(req: Request<()>) -> tide::Result {
+    let config = &Config::global();
+    let repo = repo_from_request(req.param("repo_name")?)?;
+    let commit = repo
+        .revparse_single(req.param("commit")?)?
+        .peel_to_commit()?;
+
+    let parent = repo
+        .revparse_single(&format!("{}^", commit.id()))?
+        .peel_to_commit()?;
+    // TODO root commit
+    // how to deal w multiple parents?
+    let diff = repo.diff_tree_to_tree(Some(&commit.tree()?), Some(&parent.tree()?), None)?;
+    let deltas = diff.deltas().collect();
+
+    // TODO accept reference or commit id
+    let tmpl = RepoCommitTemplate {
+        repo: &repo,
+        config,
+        commit,
+        parent,
+        diff: &diff,
+        deltas,
+    };
+    Ok(tmpl.into())
+}
 mod filters {
     pub fn iso_date(i: &i64) -> ::askama::Result<String> {
         // UTC date
@@ -234,7 +270,7 @@ async fn main() -> Result<(), std::io::Error> {
         .serve_file("templates/static/style.css")?; // TODO configurable
     app.at("/:repo_name").get(repo_home);
     // ALSO do git pull at this url somehow ^
-    // app.at("/:repo_name/commit/:hash").get(repo_log);
+    app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref optional

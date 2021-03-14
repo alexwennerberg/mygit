@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  {% include "repo-navbar.html" %}
+  <b>Commit:</b> <div class="commit-hash">{{commit.id()}}</div> (<a href="/{{name}}/tree/{{parent.id()}}">tree</a>)
+  <br>
+  <b>Parent:</b> <a href="/{{name}}/commit/{{parent.id()}}"><div class="commit-hash">{{parent.id()}}</div></a> (<a href="/{{name}}/tree/{{parent.id()}}">tree</a>)
+  <br>
+  <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
+  <br>
+  <b>Date:</b> {{commit.time().seconds()}}
+  <br>
+  {% let stats = diff.stats().unwrap() %}
+  {{stats.files_changed()}} files changed; {{stats.insertions()}} insertions {{stats.deletions()}} deletions
+  <div class="commit-message">
+  {{commit.message().unwrap()}} 
+  </div>
+{% endblock %}

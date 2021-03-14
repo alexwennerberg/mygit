@@ -35,16 +35,17 @@ struct IndexTemplate<'a> {
 
 async fn index(req: Request<()>) -> tide::Result {
     let config = &Config::global();
-    let repos = &config.repo_directory;
-    let paths = fs::read_dir(repos)?;
-    let mut index_template = IndexTemplate {
-        repos: vec![],
-        config: config,
-    }; // TODO replace with map/collect
-    for path in paths {
-        let repo = Repository::open(path?.path())?;
-        index_template.repos.push(repo);
-    }
+    let repos = fs::read_dir(&config.repo_directory)
+        .map(|entries| {
+            entries
+                .filter_map(|entry| Some(entry.ok()?.path()))
+                // TODO check for git-daemon-export-ok file
+                .filter_map(|entry| Repository::open(entry).ok())
+                .collect::<Vec<_>>()
+        })
+        .map_err(|e| tide::log::warn!("can not read repositories: {}", e))
+        .unwrap_or_default();
+    let mut index_template = IndexTemplate { repos, config };
 
     Ok(index_template.into())
 }

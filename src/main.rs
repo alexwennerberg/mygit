@@ -1,7 +1,7 @@
 use anyhow::Result;
 use askama::Template;
 use git2::{Commit, Diff, DiffDelta, DiffFormat, Oid, Reference, Repository, Tree, TreeEntry};
-use once_cell::sync::OnceCell;
+use once_cell::sync::Lazy;
 use pico_args;
 use pulldown_cmark::{html, Options, Parser};
 use serde::{Deserialize, Serialize};
@@ -18,24 +18,46 @@ pub struct Config {
     emoji_favicon: String,
 }
 
-static CONFIG: OnceCell<Config> = OnceCell::new();
+const HELP: &str = "\
+mygit
 
-impl Config {
-    pub fn global() -> &'static Config {
-        CONFIG.get().expect("Config is not initialized")
+FLAGS:
+  -h, --help            Prints help information
+OPTIONS:
+  -c                    Path to config file
+";
+
+static CONFIG: Lazy<Config> = Lazy::new(args);
+
+fn args() -> Config {
+    // TODO cli
+
+    let mut pargs = pico_args::Arguments::from_env();
+
+    if pargs.contains(["-h", "--help"]) {
+        print!("{}", HELP);
+        std::process::exit(0);
+    }
+
+    let toml_text =
+        fs::read_to_string("mygit.toml").expect("expected configuration file mygit.toml");
+    match toml::from_str(&toml_text) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("could not read configuration file: {}", e);
+            std::process::exit(1);
+        }
     }
 }
 
 #[derive(Template)]
 #[template(path = "index.html")] // using the template in this path, relative
-struct IndexTemplate<'a> {
+struct IndexTemplate {
     repos: Vec<Repository>,
-    config: &'a Config,
 }
 
 async fn index(req: Request<()>) -> tide::Result {
-    let config = &Config::global();
-    let repos = fs::read_dir(&config.repo_directory)
+    let repos = fs::read_dir(&CONFIG.repo_directory)
         .map(|entries| {
             entries
                 .filter_map(|entry| Some(entry.ok()?.path()))
@@ -50,7 +72,7 @@ async fn index(req: Request<()>) -> tide::Result {
         })
         .map_err(|e| tide::log::warn!("can not read repositories: {}", e))
         .unwrap_or_default();
-    let mut index_template = IndexTemplate { repos, config };
+    let index_template = IndexTemplate { repos };
 
     Ok(index_template.into())
 }
@@ -60,18 +82,16 @@ async fn index(req: Request<()>) -> tide::Result {
 struct RepoHomeTemplate<'a> {
     repo: &'a Repository,
     readme_text: &'a str,
-    config: &'a Config,
 }
 
 fn repo_from_request(repo_name: &str) -> Result<Repository> {
-    let repo_path = Path::new(&Config::global().repo_directory).join(repo_name);
+    let repo_path = Path::new(&CONFIG.repo_directory).join(repo_name);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     let r = Repository::open(repo_path)?;
     Ok(r)
 }
 
 async fn repo_home(req: Request<()>) -> tide::Result {
-    let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     let readme = &repo.revparse_single("HEAD:README.md")?; // TODO allow more incl plaintext
     let markdown_input = std::str::from_utf8(readme.as_blob().unwrap().content())?;
@@ -82,7 +102,6 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     let tmpl = RepoHomeTemplate {
         repo: &repo,
         readme_text: &html_output,
-        config,
     };
     Ok(tmpl.into())
 }
@@ -91,12 +110,10 @@ async fn repo_home(req: Request<()>) -> tide::Result {
 #[template(path = "log.html")] // using the template in this path, relative
 struct RepoLogTemplate<'a> {
     repo: &'a Repository,
-    config: &'a Config,
     commits: Vec<Commit<'a>>,
 }
 
 async fn repo_log(req: Request<()>) -> tide::Result {
-    let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     let mut revwalk = repo.revwalk()?;
     match req.param("ref") {
@@ -109,7 +126,6 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         .collect();
     let tmpl = RepoLogTemplate {
         repo: &repo,
-        config,
         commits,
     };
     Ok(tmpl.into())
@@ -119,12 +135,10 @@ async fn repo_log(req: Request<()>) -> tide::Result {
 #[template(path = "refs.html")] // using the template in this path, relative
 struct RepoRefTemplate<'a> {
     repo: &'a Repository,
-    config: &'a Config,
     branches: Vec<Reference<'a>>,
     tags: Vec<Reference<'a>>,
 }
 async fn repo_refs(req: Request<()>) -> tide::Result {
-    let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     let branches = repo
         .references()?
@@ -138,7 +152,6 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
         .collect();
     let tmpl = RepoRefTemplate {
         repo: &repo,
-        config,
         branches,
         tags,
     };
@@ -149,22 +162,16 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
 #[template(path = "tree.html")] // using the template in this path, relative
 struct RepoTreeTemplate<'a> {
     repo: &'a Repository,
-    config: &'a Config,
     tree: Tree<'a>,
 }
 async fn repo_tree(req: Request<()>) -> tide::Result {
     // TODO handle subtrees
-    let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     // TODO accept reference or commit id
     let spec = req.param("ref").unwrap_or("HEAD");
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
-    let tmpl = RepoTreeTemplate {
-        repo: &repo,
-        config,
-        tree,
-    };
+    let tmpl = RepoTreeTemplate { repo: &repo, tree };
     Ok(tmpl.into())
 }
 
@@ -172,7 +179,6 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
 #[template(path = "commit.html")] // using the template in this path, relative
 struct RepoCommitTemplate<'a> {
     repo: &'a Repository,
-    config: &'a Config,
     commit: Commit<'a>,
     parent: Commit<'a>,
     diff: &'a Diff<'a>,
@@ -180,7 +186,6 @@ struct RepoCommitTemplate<'a> {
 }
 
 async fn repo_commit(req: Request<()>) -> tide::Result {
-    let config = &Config::global();
     let repo = repo_from_request(req.param("repo_name")?)?;
     let commit = repo
         .revparse_single(req.param("commit")?)?
@@ -197,7 +202,6 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
     // TODO accept reference or commit id
     let tmpl = RepoCommitTemplate {
         repo: &repo,
-        config,
         commit,
         parent,
         diff: &diff,
@@ -243,31 +247,8 @@ mod filters {
     }
 }
 
-const HELP: &str = "\
-mygit
-
-FLAGS:
-  -h, --help            Prints help information
-OPTIONS:
-  -c                    Path to config file
-";
-
 #[async_std::main]
 async fn main() -> Result<(), std::io::Error> {
-    let mut pargs = pico_args::Arguments::from_env();
-
-    if pargs.contains(["-h", "--help"]) {
-        print!("{}", HELP);
-        std::process::exit(0);
-    }
-
-    // TODO cli
-
-    let toml_text =
-        fs::read_to_string("mygit.toml").expect("expected configuration file mygit.toml");
-    let config: Config = toml::from_str(&toml_text)?;
-    CONFIG.set(config).unwrap();
-
     tide::log::start();
     let mut app = tide::new();
     app.at("/").get(index);

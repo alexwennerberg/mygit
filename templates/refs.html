@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  {% include "repo-navbar.html" %}
+  <h2>Branches</h2>
+  <table>
+  {% for branch in branches %}
+  <tr>
+    <td class="git-reference">
+    <a href="/{{name}}/log/{{branch.shorthand().unwrap()}}">{{ branch.shorthand().unwrap() }}</a>
+    </td>
+  </tr>
+  {% endfor %}
+  </table>
+  <h2>Tags</h2>
+  <table>
+  {% for tag in tags %}
+  <tr><td class="git-reference">{{ tag.shorthand().unwrap() }}</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

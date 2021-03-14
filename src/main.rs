@@ -1,6 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Repository};
+use git2::{Commit, Reference, Repository};
 use once_cell::sync::OnceCell;
 use pico_args;
 use pulldown_cmark::{html, Options, Parser};
@@ -98,12 +98,43 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         _ => revwalk.push_head()?,
     };
     let commits = revwalk
-        .map(|oid| repo.find_commit(oid.unwrap()).unwrap().clone()) // TODO error handling
+        .filter_map(|oid| repo.find_commit(oid.unwrap()).ok().clone()) // TODO error handling
+        .take(100) // Only get first 100 commits
         .collect();
     let tmpl = RepoLogTemplate {
         repo: &repo,
         config,
         commits,
+    };
+    Ok(tmpl.into())
+}
+
+#[derive(Template)]
+#[template(path = "refs.html")] // using the template in this path, relative
+struct RepoRefTemplate<'a> {
+    repo: &'a Repository,
+    config: &'a Config,
+    branches: Vec<Reference<'a>>,
+    tags: Vec<Reference<'a>>,
+}
+async fn repo_refs(req: Request<()>) -> tide::Result {
+    let config = &Config::global();
+    let repo = repo_from_request(&req.param("repo_name")?)?;
+    let branches = repo
+        .references()?
+        .filter_map(|x| x.ok())
+        .filter(|x| x.is_branch())
+        .collect();
+    let tags = repo
+        .references()?
+        .filter_map(|x| x.ok())
+        .filter(|x| x.is_tag())
+        .collect();
+    let tmpl = RepoRefTemplate {
+        repo: &repo,
+        config,
+        branches,
+        tags,
     };
     Ok(tmpl.into())
 }
@@ -142,6 +173,7 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name").get(repo_home);
     // ALSO do git pull at this url somehow ^
     // app.at("/:repo_name/commit/:hash").get(repo_log);
+    app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
                                                   // app.at("/:repo_name/tree/:ref").get(repo_log); ref = master/main when not present

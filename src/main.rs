@@ -1,6 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Reference, Repository};
+use git2::{Commit, Reference, Repository, Tree, TreeEntry};
 use once_cell::sync::OnceCell;
 use pico_args;
 use pulldown_cmark::{html, Options, Parser};
@@ -68,7 +68,7 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     let config = &Config::global();
     let repo = repo_from_request(&req.param("repo_name")?)?;
     let readme = &repo.revparse_single("HEAD:README.md")?; // TODO allow more incl plaintext
-    let markdown_input = str::from_utf8(readme.as_blob().unwrap().content())?;
+    let markdown_input = std::str::from_utf8(readme.as_blob().unwrap().content())?;
     let mut options = Options::empty();
     let parser = Parser::new_ext(markdown_input, options);
     let mut html_output = String::new();
@@ -139,6 +139,68 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
     Ok(tmpl.into())
 }
 
+#[derive(Template)]
+#[template(path = "tree.html")] // using the template in this path, relative
+struct RepoTreeTemplate<'a> {
+    repo: &'a Repository,
+    config: &'a Config,
+    tree: Tree<'a>,
+}
+async fn repo_tree(req: Request<()>) -> tide::Result {
+    // TODO handle subtrees
+    let config = &Config::global();
+    let repo = repo_from_request(&req.param("repo_name")?)?;
+    // TODO accept reference or commit id
+    let commit = match req.param("ref") {
+        _ => repo.revparse_single("HEAD")?.peel_to_commit()?,
+    };
+    let tree = commit.tree()?;
+    let tmpl = RepoTreeTemplate {
+        repo: &repo,
+        config,
+        tree,
+    };
+    Ok(tmpl.into())
+}
+
+mod filters {
+    pub fn iso_date(i: &i64) -> ::askama::Result<String> {
+        // UTC date
+        let datetime: chrono::DateTime<chrono::Utc> =
+            chrono::DateTime::from_utc(chrono::NaiveDateTime::from_timestamp(*i, 0), chrono::Utc);
+        Ok(datetime.format("%Y-%m-%d").to_string())
+    }
+
+    pub fn unix_perms(m: &i32) -> ::askama::Result<String> {
+        let mut m = *m;
+        // manually wrote this bc I couldn't find a library
+        // acting like I'm writing C for fun
+        // TODO -- symlinks?
+        // https://unix.stackexchange.com/questions/450480/file-permission-with-six-bytes-in-git-what-does-it-mean
+        if m == 0o040000 {
+            // is directory
+            return Ok("d---------".to_owned());
+        }
+        let mut output: [u8; 10] = [0; 10]; // ascii string
+        let mut i = 9;
+        for _ in 0..3 {
+            // Go backwards here
+            for c in &[0x78, 0x77, 0x72] {
+                // xrw
+                if m % 2 == 1 {
+                    output[i] = *c;
+                } else {
+                    output[i] = 0x2d; // -
+                }
+                m >>= 1;
+                i -= 1;
+            }
+        }
+        output[i] = 0x2d; // -
+        return Ok(std::str::from_utf8(&output).unwrap().to_owned());
+    }
+}
+
 const HELP: &str = "\
 mygit
 
@@ -176,10 +238,10 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
-                                                  // app.at("/:repo_name/tree/:ref").get(repo_log); ref = master/main when not present
-                                                  // app.at("/:repo_name/tree/:ref/item/:file").get(repo_log); ref = master/main when not present
-                                                  // app.at("/:repo_name/refs").get(repo_log); ref = master/main when not present
-                                                  // Bonus: raw files, patchsets
+    app.at("/:repo_name/tree").get(repo_tree);
+    app.at("/:repo_name/tree/:ref").get(repo_tree);
+    // app.at("/:repo_name/tree/:ref/item/:file").get(repo_log); ref = master/main when not present
+    // Bonus: raw files, patchsets
     app.listen("127.0.0.1:8081").await?;
     Ok(())
 }

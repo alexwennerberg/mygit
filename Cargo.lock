@@ -1124,6 +1124,7 @@ dependencies = [
  "askama",
  "askama_tide",
  "async-std",
+ "chrono",
  "git2",
  "once_cell",
  "pico-args",

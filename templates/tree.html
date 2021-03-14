@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  {% include "repo-navbar.html" %}
+  <table>
+    {% for entry in tree %}
+    <tr>
+      <td class="permissions">
+        {{ entry.filemode()|unix_perms }}
+      </td>
+      <td>
+        {{ entry.name().unwrap() }}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

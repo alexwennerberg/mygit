@@ -1,5 +1,5 @@
 body {
-  max-width: 90ch;
+  max-width: 95ch;
   padding: 2ch;
   margin: auto;
   font-family: "Roboto", Helvetica, Arial, Sans-serif;
@@ -42,10 +42,6 @@ h2 {
    margin: 0px;
 }
 
-table {
-  width: 100%;
-  overflow-x: auto;
-}
 
 pre {
     line-height: 1.2;
@@ -58,11 +54,18 @@ tr:hover {
 }
 
 td {
+  white-space: nowrap;
   margin: 0px;
   border-style:hidden;
   padding: 0;
 }
+
+table td {
+    padding: 0 0.4em;
+  }
+
 table {
+  width: 100%;
   border-collapse: collapse;
 }
 

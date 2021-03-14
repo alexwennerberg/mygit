@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
+  {% include "repo-navbar.html" %}
+  <table>
+  {% for commit in commits %} 
+  <tr>
+    <td class="commit-hash"><a href="/{{name}}/commits/{{commit.id()}}">{{commit.id().to_string()[..7]}}</td>
+    {% let summary = commit.summary().unwrap_or("") %}
+    {% if summary.len() > 72 %}
+    <td>{{summary[..69]}}...</td>
+    {% else %}
+    <td>{{summary}}</td>
+    {% endif %}
+    <td><a href="mailto:{{commit.author().email().unwrap_or("")}}">{{commit.author().name().unwrap_or("")}}</a></td>
+    <td>{{commit.time().seconds()}}</td>
+  </tr>
+  {% endfor %}
+  </table>
+{% endblock %}
+

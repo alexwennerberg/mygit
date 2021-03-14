@@ -1,5 +1,6 @@
+use anyhow::Result;
 use askama::Template;
-use git2::Repository;
+use git2::{Commit, Repository};
 use once_cell::sync::OnceCell;
 use pico_args;
 use pulldown_cmark::{html, Options, Parser};
@@ -56,11 +57,16 @@ struct RepoHomeTemplate<'a> {
     config: &'a Config,
 }
 
+fn repo_from_request(repo_name: &str) -> Result<Repository> {
+    let repo_path = Path::new(&Config::global().repo_directory).join(repo_name);
+    // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
+    let r = Repository::open(repo_path)?;
+    Ok(r)
+}
+
 async fn repo_home(req: Request<()>) -> tide::Result {
     let config = &Config::global();
-    let repo_path = Path::new(&config.repo_directory).join(req.param("repo_name")?);
-    // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
-    let repo = Repository::open(repo_path)?;
+    let repo = repo_from_request(&req.param("repo_name")?)?;
     let readme = &repo.revparse_single("HEAD:README.md")?; // TODO allow more incl plaintext
     let markdown_input = str::from_utf8(readme.as_blob().unwrap().content())?;
     let mut options = Options::empty();
@@ -71,6 +77,33 @@ async fn repo_home(req: Request<()>) -> tide::Result {
         repo: &repo,
         readme_text: &html_output,
         config,
+    };
+    Ok(tmpl.into())
+}
+
+#[derive(Template)]
+#[template(path = "log.html")] // using the template in this path, relative
+struct RepoLogTemplate<'a> {
+    repo: &'a Repository,
+    config: &'a Config,
+    commits: Vec<Commit<'a>>,
+}
+
+async fn repo_log(req: Request<()>) -> tide::Result {
+    let config = &Config::global();
+    let repo = repo_from_request(&req.param("repo_name")?)?;
+    let mut revwalk = repo.revwalk()?;
+    match req.param("ref") {
+        Ok(r) => revwalk.push_ref(&format!("refs/heads/{}", r))?,
+        _ => revwalk.push_head()?,
+    };
+    let commits = revwalk
+        .map(|oid| repo.find_commit(oid.unwrap()).unwrap().clone()) // TODO error handling
+        .collect();
+    let tmpl = RepoLogTemplate {
+        repo: &repo,
+        config,
+        commits,
     };
     Ok(tmpl.into())
 }
@@ -109,11 +142,12 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name").get(repo_home);
     // ALSO do git pull at this url somehow ^
     // app.at("/:repo_name/commit/:hash").get(repo_log);
-    // app.at("/:repo_name/log/:ref").get(repo_log); ref optional, default master/main
-    // app.at("/:repo_name/tree/:ref").get(repo_log); ref = master/main when not present
-    // app.at("/:repo_name/tree/:ref/item/:file").get(repo_log); ref = master/main when not present
-    // app.at("/:repo_name/refs").get(repo_log); ref = master/main when not present
-    // Bonus: raw files, patchsets
+    app.at("/:repo_name/log").get(repo_log);
+    app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
+                                                  // app.at("/:repo_name/tree/:ref").get(repo_log); ref = master/main when not present
+                                                  // app.at("/:repo_name/tree/:ref/item/:file").get(repo_log); ref = master/main when not present
+                                                  // app.at("/:repo_name/refs").get(repo_log); ref = master/main when not present
+                                                  // Bonus: raw files, patchsets
     app.listen("127.0.0.1:8081").await?;
     Ok(())
 }

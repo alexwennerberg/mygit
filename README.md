@@ -12,7 +12,9 @@ The simplest way to accept patches is through [git-send-email](https://git-scm.c
 
 Like a lot of git software, a lot of email software, like public-inbox and [hyperkitty](https://github.com/hypermail-project/hypermail) are ancient C/Perl programs with certain disadvantages. I think [sourcehut](https://lists.sr.ht)'s mailing list is a great example of a modern, easy-to-use mailing list software, but in addition to being challenging to self-host, also has some highly opinionated design decisions, like blocking all html emails, even multipart ones, and using a tilde in the mailing list address, which not all providers support.
 
-This project is on sr.ht until I can get it self-hosted. Here is the ticket tracker: https://todo.sr.ht/~aw/mygit
+This project is on sr.ht until I can get it self-hosted. 
+* [ticket tracker](https://todo.sr.ht/~aw/mygit)
+* [patches](https://lists.sr.ht/~aw/patches)
 
 ## Design
 

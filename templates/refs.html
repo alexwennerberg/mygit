@@ -16,7 +16,7 @@
   <h2>Tags</h2>
   <table>
   {% for tag in tags %}
-  <tr><td class="git-reference">{{ tag.shorthand().unwrap() }}</td></tr>
+  <tr><td class="git-reference"><a href="/{{name}}/commit/{{tag.shorthand().unwrap()}}">{{ tag.shorthand().unwrap() }}</a></td></tr>
   {% endfor %}
   </table>
 {% endblock %}

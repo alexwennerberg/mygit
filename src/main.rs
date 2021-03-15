@@ -111,7 +111,7 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(&req.param("repo_name")?)?;
     if repo.is_empty().unwrap() {
         // we would not be able to find HEAD
-        return Ok(RepoEmptyTemplate { repo }.into())
+        return Ok(RepoEmptyTemplate { repo }.into());
     }
 
     let readme_text = {
@@ -172,15 +172,26 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         return Ok(tide::Redirect::temporary(url.to_string()).into());
     }
 
-    let mut revwalk = repo.revwalk()?;
-    match req.param("ref") {
-        Ok(r) => revwalk.push_ref(&format!("refs/heads/{}", r))?,
-        _ => revwalk.push_head()?,
+    let commits = if repo.is_shallow() {
+        tide::log::warn!("repository {:?} is only a shallow clone", repo.path());
+        vec![repo.head()?.peel_to_commit().unwrap()]
+    } else {
+        let mut revwalk = repo.revwalk()?;
+        match req.param("ref") {
+            Ok(r) => revwalk.push_ref(&format!("refs/heads/{}", r))?,
+            _ => revwalk.push_head()?,
+        };
+
+        // show newest commits first
+        revwalk
+            .set_sorting(git2::Sort::TIME | git2::Sort::REVERSE)
+            .unwrap();
+
+        revwalk
+            .filter_map(|oid| repo.find_commit(oid.unwrap()).ok().clone()) // TODO error handling
+            .take(100) // Only get first 100 commits
+            .collect()
     };
-    let commits = revwalk
-        .filter_map(|oid| repo.find_commit(oid.unwrap()).ok().clone()) // TODO error handling
-        .take(100) // Only get first 100 commits
-        .collect();
     let tmpl = RepoLogTemplate {
         repo: &repo,
         commits,

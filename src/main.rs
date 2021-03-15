@@ -18,7 +18,7 @@ pub struct Config {
 }
 
 const HELP: &str = "\
-mygit
+grifter
 
 FLAGS:
   -h, --help            Prints help information
@@ -39,7 +39,7 @@ fn args() -> Config {
     }
 
     let toml_text =
-        fs::read_to_string("mygit.toml").expect("expected configuration file mygit.toml");
+        fs::read_to_string("grifter.toml").expect("expected configuration file grifter.toml");
     match toml::from_str(&toml_text) {
         Ok(config) => config,
         Err(e) => {

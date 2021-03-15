@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
   {% include "repo-navbar.html" %}
   <table>
     {% for entry in tree %}

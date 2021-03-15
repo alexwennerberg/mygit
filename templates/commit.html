@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {% let name = repo.workdir().unwrap().file_name().unwrap().to_str().unwrap() %}
   {% include "repo-navbar.html" %}
-  <b>Commit:</b> <div class="commit-hash">{{commit.id()}}</div> (<a href="/{{name}}/tree/{{parent.id()}}">tree</a>)
+  <b>Commit:</b> <div class="commit-hash">{{commit.id()}}</div> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
   <br>
-  <b>Parent:</b> <a href="/{{name}}/commit/{{parent.id()}}"><div class="commit-hash">{{parent.id()}}</div></a> (<a href="/{{name}}/tree/{{parent.id()}}">tree</a>)
+  <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent.id()}}"><div class="commit-hash">{{parent.id()}}</div></a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
   <br>
   <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
   <br>

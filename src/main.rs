@@ -84,6 +84,9 @@ struct RepoHomeTemplate {
 }
 
 fn repo_from_request(repo_name: &str) -> Result<Repository> {
+    let repo_name = percent_encoding::percent_decode_str(repo_name)
+        .decode_utf8_lossy()
+        .into_owned();
     let repo_path = Path::new(&CONFIG.repo_directory).join(repo_name);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     let r = Repository::open(repo_path)?;

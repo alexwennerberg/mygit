@@ -1127,6 +1127,7 @@ dependencies = [
  "chrono",
  "git2",
  "once_cell",
+ "percent-encoding",
  "pico-args",
  "pulldown-cmark",
  "serde",

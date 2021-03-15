@@ -83,6 +83,12 @@ struct RepoHomeTemplate {
     readme_text: String,
 }
 
+#[derive(Template)]
+#[template(path = "repo-empty.html")]
+struct RepoEmptyTemplate {
+    repo: Repository,
+}
+
 fn repo_from_request(repo_name: &str) -> Result<Repository> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
@@ -103,6 +109,10 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     }
 
     let repo = repo_from_request(&req.param("repo_name")?)?;
+    if repo.is_empty().unwrap() {
+        // we would not be able to find HEAD
+        return Ok(RepoEmptyTemplate { repo }.into())
+    }
 
     let readme_text = {
         let mut format = ReadmeFormat::Plaintext;
@@ -155,6 +165,13 @@ struct RepoLogTemplate<'a> {
 
 async fn repo_log(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(&req.param("repo_name")?)?;
+    if repo.is_empty().unwrap() {
+        // redirect to start page of repo
+        let mut url = req.url().clone();
+        url.path_segments_mut().unwrap().pop();
+        return Ok(tide::Redirect::temporary(url.to_string()).into());
+    }
+
     let mut revwalk = repo.revwalk()?;
     match req.param("ref") {
         Ok(r) => revwalk.push_ref(&format!("refs/heads/{}", r))?,
@@ -180,6 +197,13 @@ struct RepoRefTemplate<'a> {
 }
 async fn repo_refs(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(&req.param("repo_name")?)?;
+    if repo.is_empty().unwrap() {
+        // redirect to start page of repo
+        let mut url = req.url().clone();
+        url.path_segments_mut().unwrap().pop();
+        return Ok(tide::Redirect::temporary(url.to_string()).into());
+    }
+
     let branches = repo
         .references()?
         .filter_map(|x| x.ok())
@@ -207,6 +231,13 @@ struct RepoTreeTemplate<'a> {
 async fn repo_tree(req: Request<()>) -> tide::Result {
     // TODO handle subtrees
     let repo = repo_from_request(&req.param("repo_name")?)?;
+    if repo.is_empty().unwrap() {
+        // redirect to start page of repo
+        let mut url = req.url().clone();
+        url.path_segments_mut().unwrap().pop();
+        return Ok(tide::Redirect::temporary(url.to_string()).into());
+    }
+
     // TODO accept reference or commit id
     let spec = req.param("ref").unwrap_or("HEAD");
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;

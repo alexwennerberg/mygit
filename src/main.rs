@@ -213,7 +213,7 @@ async fn repo_log(req: Request<()>) -> tide::Result {
 
         // show newest commits first
         revwalk
-            .set_sorting(git2::Sort::TIME | git2::Sort::REVERSE)
+            .set_sorting(git2::Sort::TIME)
             .unwrap();
 
         revwalk

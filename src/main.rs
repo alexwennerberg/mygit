@@ -12,11 +12,36 @@ use tide::Request;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
+    #[serde(default = "defaults::port")]
     port: u16,
+    #[serde(default = "defaults::repo_directory")]
     projectroot: String,
+    #[serde(default = "String::new")]
     emoji_favicon: String,
+    #[serde(default = "defaults::site_name")]
     site_name: String,
+    #[serde(default = "defaults::export_ok")]
     export_ok: String,
+}
+
+/// Defaults for the configuration options
+// FIXME: simplify if https://github.com/serde-rs/serde/issues/368 is resolved
+mod defaults {
+    pub fn port() -> u16 {
+        80
+    }
+
+    pub fn repo_directory() -> String {
+        "repos".to_string()
+    }
+
+    pub fn site_name() -> String {
+        "grifter".to_string()
+    }
+
+    pub fn export_ok() -> String {
+        "git-daemon-export-ok".to_string()
+    }
 }
 
 const HELP: &str = "\
@@ -40,8 +65,10 @@ fn args() -> Config {
         std::process::exit(0);
     }
 
-    let toml_text =
-        fs::read_to_string("mygit.toml").expect("expected configuration file mygit.toml");
+    let toml_text = fs::read_to_string("mygit.toml").unwrap_or_else(|_| {
+        tide::log::warn!("mygit.toml configuration file not found, using defaults");
+        String::new()
+    });
     match toml::from_str(&toml_text) {
         Ok(config) => config,
         Err(e) => {

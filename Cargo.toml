@@ -22,3 +22,4 @@ serde = { version = "1.0", features = ["derive"] }
 syntect = {version="4.5", default-features = false, features=["html", "regex-onig"]}
 tide = "0.16"
 toml = "0.5.8"
+mygit-inbox = {version = "*", path = "./mygit-inbox"}

@@ -190,6 +190,7 @@ async fn repo_home(req: Request<()>) -> tide::Result {
 struct RepoLogTemplate<'a> {
     repo: &'a Repository,
     commits: Vec<Commit<'a>>,
+    branch: &'a str,
 }
 
 async fn repo_log(req: Request<()>) -> tide::Result {
@@ -200,30 +201,31 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         url.path_segments_mut().unwrap().pop();
         return Ok(tide::Redirect::temporary(url.to_string()).into());
     }
-
     let commits = if repo.is_shallow() {
         tide::log::warn!("repository {:?} is only a shallow clone", repo.path());
         vec![repo.head()?.peel_to_commit().unwrap()]
     } else {
         let mut revwalk = repo.revwalk()?;
         match req.param("ref") {
-            Ok(r) => revwalk.push_ref(&format!("refs/heads/{}", r))?,
-            _ => revwalk.push_head()?,
+            Ok(r) => {
+                revwalk.push_ref(&format!("refs/heads/{}", r))?;
+            }
+            _ => {
+                revwalk.push_head()?;
+            }
         };
-
-        // show newest commits first
-        revwalk
-            .set_sorting(git2::Sort::TIME)
-            .unwrap();
-
+        revwalk.set_sorting(git2::Sort::TIME).unwrap();
         revwalk
             .filter_map(|oid| repo.find_commit(oid.unwrap()).ok().clone()) // TODO error handling
-            .take(100) // Only get first 100 commits
+            .take(100)
             .collect()
     };
+    let head_branch = repo.head()?;
+    let branch = req.param("ref").unwrap_or(head_branch.shorthand().unwrap());
     let tmpl = RepoLogTemplate {
         repo: &repo,
         commits,
+        branch: branch,
     };
     Ok(tmpl.into())
 }

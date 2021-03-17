@@ -2,6 +2,7 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
+  <h2>{{branch}}</h2>
   <table>
   {% for commit in commits %} 
   <tr>

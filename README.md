@@ -1,8 +1,6 @@
-# mygit -- the world's smallest Git host
+# mygit
 
 A small self-hosted git server: a Rust alternative to git-web and cgit
-
-TODO move email discussion to https://git.sr.ht/~aw/rusty-inbox
 
 ## The problem
 
@@ -12,7 +10,8 @@ I really like [stagit](https://codemadness.org/stagit.html), but it's a bit too 
 
 The simplest way to accept patches is through [git-send-email](https://git-scm.com/docs/git-send-email), so I also want to setup a mailing list archive. The simplest way to do this is via IMAP and the [public-inbox](https://public-inbox.org/README.html) model -- the mailing list does not send out messages but simply receives them. Users can use RSS/imap/web view to view the patches. This is step above the opacity of a personal email, but much, much easier to self-host than a full mailing list.
 
-Like a lot of git software, a lot of email software, like public-inbox and [hyperkitty](https://github.com/hypermail-project/hypermail) are ancient C/Perl programs with certain disadvantages. I think [sourcehut](https://lists.sr.ht)'s mailing list is a great example of a modern, easy-to-use mailing list software, but in addition to being challenging to self-host, also has some highly opinionated design decisions, like blocking all html emails, even multipart ones, and using a tilde in the mailing list address, which not all providers support.
+I am working on a sibling project to this that handles mailing list archives:
+https://git.sr.ht/~aw/rusty-inbox
 
 This project is on sr.ht until I can get it self-hosted. 
 * [ticket tracker](https://todo.sr.ht/~aw/grifter)

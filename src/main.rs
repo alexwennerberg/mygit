@@ -229,7 +229,7 @@ async fn repo_log(req: Request<()>) -> tide::Result {
     let tmpl = RepoLogTemplate {
         repo: &repo,
         commits,
-        branch: branch,
+        branch,
     };
     Ok(tmpl.into())
 }
@@ -293,7 +293,7 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
     let tmpl = RepoTreeTemplate {
         repo: &repo,
         tree,
-        spec: spec,
+        spec,
     };
     Ok(tmpl.into())
 }

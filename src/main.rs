@@ -269,6 +269,7 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
 struct RepoTreeTemplate<'a> {
     repo: &'a Repository,
     tree: Tree<'a>,
+    spec: &'a str,
 }
 async fn repo_tree(req: Request<()>) -> tide::Result {
     // TODO handle subtrees
@@ -281,10 +282,15 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
     }
 
     // TODO accept reference or commit id
-    let spec = req.param("ref").unwrap_or("HEAD");
+    let head = repo.head()?;
+    let spec = req.param("ref").unwrap_or(head.shorthand().unwrap());
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
-    let tmpl = RepoTreeTemplate { repo: &repo, tree };
+    let tmpl = RepoTreeTemplate {
+        repo: &repo,
+        tree,
+        spec: spec,
+    };
     Ok(tmpl.into())
 }
 

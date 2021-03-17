@@ -1,6 +1,8 @@
 # mygit -- the world's smallest Git host
 
-A small, self-hosted git forge, with a web viewer for repositories and and a mailing list archive
+A small self-hosted git server: a Rust alternative to git-web and cgit
+
+TODO move email discussion to https://git.sr.ht/~aw/rusty-inbox
 
 ## The problem
 

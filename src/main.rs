@@ -13,8 +13,10 @@ use tide::Request;
 #[derive(Deserialize, Debug)]
 pub struct Config {
     port: u16,
-    repo_directory: String,
+    projectroot: String,
     emoji_favicon: String,
+    site_name: String,
+    export_ok: String,
 }
 
 const HELP: &str = "\
@@ -56,14 +58,14 @@ struct IndexTemplate {
 }
 
 async fn index(req: Request<()>) -> tide::Result {
-    let repos = fs::read_dir(&CONFIG.repo_directory)
+    let repos = fs::read_dir(&CONFIG.projectroot)
         .map(|entries| {
             entries
                 .filter_map(|entry| Some(entry.ok()?.path()))
                 .filter(|entry| {
                     // check for the export file
                     let mut path = entry.clone();
-                    path.push("git-daemon-export-ok");
+                    path.push(&CONFIG.export_ok);
                     path.exists()
                 })
                 .filter_map(|entry| Repository::open(entry).ok())
@@ -93,7 +95,7 @@ fn repo_from_request(repo_name: &str) -> Result<Repository> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
         .into_owned();
-    let repo_path = Path::new(&CONFIG.repo_directory).join(repo_name);
+    let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     let r = Repository::open(repo_path)?;
     Ok(r)

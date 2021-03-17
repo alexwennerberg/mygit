@@ -1,5 +1,6 @@
 port = 8081
-# Directory to store git repos
-repo_directory = "repos"
+# Directory to find git repos
+projectroot = "repos"
 emoji_favicon = "💻"
-page_title = "My git repositories"
+site_name = "My git repositories"
+export_ok = "git-daemon-export-ok"

@@ -329,6 +329,18 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
     Ok(tmpl.into())
 }
 
+#[derive(Template)]
+#[template(path = "file.html")] // using the template in this path, relative
+struct RepoFileTemplate<'a> {
+    repo: &'a Repository,
+}
+
+async fn repo_file(req: Request<()>) -> tide::Result {
+    let repo = repo_from_request(req.param("repo_name")?)?;
+    let tmpl = RepoFileTemplate { repo: &repo };
+    Ok(tmpl.into())
+}
+
 mod filters {
     use super::*;
 
@@ -396,7 +408,7 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
     app.at("/:repo_name/tree").get(repo_tree);
     app.at("/:repo_name/tree/:ref").get(repo_tree);
-    // app.at("/:repo_name/tree/:ref/item/:file").get(repo_file);
+    app.at("/:repo_name/tree/:ref/item/:file").get(repo_file);
     // Raw files, patch files
     app.listen("127.0.0.1:8081").await?;
     Ok(())

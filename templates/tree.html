@@ -10,7 +10,8 @@
         {{ entry.filemode()|unix_perms }}
       </td>
       <td>
-        {{ entry.name().unwrap() }}
+        <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{entry.name().unwrap()}}">
+        {{ entry.name().unwrap() }}</a>
       </td>
       <td>
         filesize here

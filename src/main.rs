@@ -5,13 +5,12 @@ use git2::{
 };
 use once_cell::sync::Lazy;
 use pico_args;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::fs;
 use std::path::Path;
 use std::str;
 use syntect::highlighting::{Color, ThemeSet};
 use syntect::parsing::{SyntaxReference, SyntaxSet};
-use tide::prelude::*;
 use tide::Request;
 
 #[derive(Deserialize, Debug)]
@@ -88,7 +87,7 @@ struct IndexTemplate {
     repos: Vec<Repository>,
 }
 
-async fn index(req: Request<()>) -> tide::Result {
+async fn index(_req: Request<()>) -> tide::Result {
     let repos = fs::read_dir(&CONFIG.projectroot)
         .map(|entries| {
             entries
@@ -223,12 +222,16 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         };
         revwalk.set_sorting(git2::Sort::TIME).unwrap();
         revwalk
-            .filter_map(|oid| repo.find_commit(oid.unwrap()).ok().clone()) // TODO error handling
+            .filter_map(|oid| repo.find_commit(oid.unwrap()).ok()) // TODO error handling
             .take(100)
             .collect()
     };
     let head_branch = repo.head()?;
-    let branch = req.param("ref").unwrap_or(head_branch.shorthand().unwrap());
+    let branch = req
+        .param("ref")
+        .ok()
+        .or_else(|| head_branch.shorthand())
+        .unwrap();
     let tmpl = RepoLogTemplate {
         repo: &repo,
         commits,
@@ -290,7 +293,7 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
 
     // TODO accept reference or commit id
     let head = repo.head()?;
-    let spec = req.param("ref").unwrap_or(head.shorthand().unwrap());
+    let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
     let tmpl = RepoTreeTemplate {
@@ -349,7 +352,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(req.param("repo_name")?)?;
     // If directory -- show tree TODO
     let head = repo.head()?;
-    let spec = req.param("ref").unwrap_or(head.shorthand().unwrap());
+    let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
     let tree_entry = tree.get_name(req.param("object_name")?).unwrap();
@@ -363,7 +366,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .unwrap_or("");
     let syntax_reference = syntax_set
         .find_syntax_by_extension(extension)
-        .unwrap_or(syntax_set.find_syntax_plain_text());
+        .unwrap_or_else(|| syntax_set.find_syntax_plain_text());
     let ts = ThemeSet::load_defaults();
     let theme = &ts.themes["InspiredGitHub"]; // TODO make customizable
     let tree_obj = tree_entry.to_object(&repo)?;

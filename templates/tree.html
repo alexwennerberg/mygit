@@ -11,10 +11,13 @@
       </td>
       <td>
         <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{entry.name().unwrap()}}">
-        {{ entry.name().unwrap() }}</a>
+        {{ entry.name().unwrap() }}{% if entry.to_object(repo).unwrap().as_tree().is_some() %}/{% endif %}</a>
       </td>
       <td>
-        filesize here
+        {% let obj = entry.to_object(repo).unwrap() %}
+        {% if obj.as_blob().is_some() %}
+        {{ entry.to_object(repo).unwrap().into_blob().unwrap().content().len()|filesizeformat }}
+        {% endif %}
       </td>
     </tr>
     {% endfor %}

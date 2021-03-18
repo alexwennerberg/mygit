@@ -14,7 +14,7 @@ I am working on a sibling project to this that handles mailing list archives:
 https://git.sr.ht/~aw/rusty-inbox
 
 This project is on sr.ht until I can get it self-hosted. 
-* [ticket tracker](https://todo.sr.ht/~aw/grifter)
+* [ticket tracker](https://todo.sr.ht/~aw/mygit)
 * [patches](https://lists.sr.ht/~aw/patches)
 
 ## Design

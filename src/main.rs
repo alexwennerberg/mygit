@@ -1,12 +1,16 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Diff, DiffDelta, DiffFormat, Oid, Reference, Repository, Tree, TreeEntry};
+use git2::{
+    Commit, Diff, DiffDelta, DiffFormat, Object, Oid, Reference, Repository, Tree, TreeEntry,
+};
 use once_cell::sync::Lazy;
 use pico_args;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 use std::str;
+use syntect::highlighting::{Color, ThemeSet};
+use syntect::parsing::{SyntaxReference, SyntaxSet};
 use tide::prelude::*;
 use tide::Request;
 
@@ -36,7 +40,7 @@ mod defaults {
     }
 
     pub fn site_name() -> String {
-        "grifter".to_string()
+        "mygit".to_string()
     }
 
     pub fn export_ok() -> String {
@@ -333,11 +337,58 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
 #[template(path = "file.html")] // using the template in this path, relative
 struct RepoFileTemplate<'a> {
     repo: &'a Repository,
+    tree_entry: &'a TreeEntry<'a>,
+    file_text: &'a str,
 }
 
 async fn repo_file(req: Request<()>) -> tide::Result {
+    // TODO renmae for clarity
     let repo = repo_from_request(req.param("repo_name")?)?;
-    let tmpl = RepoFileTemplate { repo: &repo };
+    // If directory -- show tree TODO
+    let head = repo.head()?;
+    let spec = req.param("ref").unwrap_or(head.shorthand().unwrap());
+    let commit = repo.revparse_single(spec)?.peel_to_commit()?;
+    let tree = commit.tree()?;
+    let tree_entry = tree.get_name(req.param("object_name")?).unwrap();
+    // TODO make sure I am escaping html properly here
+    // TODO allow disabling of syntax highlighting
+    // TODO -- dont pull in memory, use iterators if possible
+    let syntax_set = SyntaxSet::load_defaults_nonewlines();
+    let extension = std::path::Path::new(tree_entry.name().unwrap())
+        .extension()
+        .and_then(std::ffi::OsStr::to_str)
+        .unwrap_or("");
+    let syntax_reference = syntax_set
+        .find_syntax_by_extension(extension)
+        .unwrap_or(syntax_set.find_syntax_plain_text());
+    let ts = ThemeSet::load_defaults();
+    let theme = &ts.themes["InspiredGitHub"]; // TODO make customizable
+    let tree_obj = tree_entry.to_object(&repo)?;
+    if tree_obj.as_tree().is_some() {
+        // TODO render tree
+    }
+    let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
+    let mut highlighter = syntect::easy::HighlightLines::new(&syntax_reference, &theme);
+    let (mut output, bg) = syntect::html::start_highlighted_html_snippet(&theme);
+    for (n, line) in syntect::util::LinesWithEndings::from(file_string).enumerate() {
+        let regions = highlighter.highlight(line, &syntax_set);
+        output.push_str(&format!(
+            "<a href='#L{0}' id='L{0}' class='line'>{0:>6}</a>&nbsp;",
+            n
+        ));
+        syntect::html::append_highlighted_html_for_styled_line(
+            &regions[..],
+            syntect::html::IncludeBackground::IfDifferent(bg),
+            &mut output,
+        );
+    }
+    output.push_str("</pre>\n");
+
+    let tmpl = RepoFileTemplate {
+        repo: &repo,
+        tree_entry: &tree_entry,
+        file_text: &output,
+    };
     Ok(tmpl.into())
 }
 
@@ -408,7 +459,8 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
     app.at("/:repo_name/tree").get(repo_tree);
     app.at("/:repo_name/tree/:ref").get(repo_tree);
-    app.at("/:repo_name/tree/:ref/item/:file").get(repo_file);
+    app.at("/:repo_name/tree/:ref/item/:object_name")
+        .get(repo_file);
     // Raw files, patch files
     app.listen("127.0.0.1:8081").await?;
     Ok(())

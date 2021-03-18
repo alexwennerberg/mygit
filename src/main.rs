@@ -48,12 +48,18 @@ mod defaults {
 }
 
 const HELP: &str = "\
-mygit
+Usage: mygit
 
 FLAGS:
-  -h, --help            Prints help information
+  -h, --help            Prints this help information and exits.
 OPTIONS:
-  -c                    Path to config file
+  -c, --config <FILE>   Use a specific configuration file.
+                        default is ./mygit.toml
+
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+
+Report bugs at https://todo.sr.ht/~aw/mygit
 ";
 
 static CONFIG: Lazy<Config> = Lazy::new(args);
@@ -68,14 +74,22 @@ fn args() -> Config {
         std::process::exit(0);
     }
 
-    let toml_text = fs::read_to_string("mygit.toml").unwrap_or_else(|_| {
-        tide::log::warn!("mygit.toml configuration file not found, using defaults");
+    let config_filename = pargs
+        .opt_value_from_str(["-c", "--config"])
+        .unwrap()
+        .unwrap_or("mygit.toml".to_string());
+
+    let toml_text = fs::read_to_string(&config_filename).unwrap_or_else(|_| {
+        tide::log::warn!(
+            "configuration file {:?} not found, using defaults",
+            config_filename
+        );
         String::new()
     });
     match toml::from_str(&toml_text) {
         Ok(config) => config,
         Err(e) => {
-            eprintln!("could not read configuration file: {}", e);
+            eprintln!("could not parse configuration file: {}", e);
             std::process::exit(1);
         }
     }
@@ -363,7 +377,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     let extension = std::path::Path::new(tree_entry.name().unwrap())
         .extension()
         .and_then(std::ffi::OsStr::to_str)
-        .unwrap_or("");
+        .unwrap_or_default();
     let syntax_reference = syntax_set
         .find_syntax_by_extension(extension)
         .unwrap_or_else(|| syntax_set.find_syntax_plain_text());

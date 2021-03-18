@@ -393,8 +393,8 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     for (n, line) in syntect::util::LinesWithEndings::from(file_string).enumerate() {
         let regions = highlighter.highlight(line, &syntax_set);
         output.push_str(&format!(
-            "<a href='#L{0}' id='L{0}' class='line'>{0:>6}</a>&nbsp;",
-            n
+            "<a href='#L{0}' id='L{0}' class='line'>{0}</a>",
+            n + 1
         ));
         syntect::html::append_highlighted_html_for_styled_line(
             &regions[..],

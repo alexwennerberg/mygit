@@ -106,13 +106,12 @@ async fn index(_req: Request<()>) -> tide::Result {
         .map(|entries| {
             entries
                 .filter_map(|entry| Some(entry.ok()?.path()))
-                .filter(|entry| {
-                    // check for the export file
-                    let mut path = entry.clone();
-                    path.push(&CONFIG.export_ok);
-                    path.exists()
-                })
                 .filter_map(|entry| Repository::open(entry).ok())
+                .filter(|repo| {
+                    // check for the export file in the git directory
+                    // (the .git subfolder for non-bare repos)
+                    repo.path().join(&CONFIG.export_ok).exists()
+                })
                 .collect::<Vec<_>>()
         })
         .map_err(|e| tide::log::warn!("can not read repositories: {}", e))

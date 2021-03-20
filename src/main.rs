@@ -449,6 +449,16 @@ mod filters {
             .to_str()
             .ok_or(askama::Error::Fmt(std::fmt::Error))
     }
+
+    pub fn description(repo: &Repository) -> askama::Result<String> {
+        Ok(fs::read_to_string(repo.path().join("description"))
+            .unwrap_or_default()
+            // only use first line
+            .lines()
+            .next()
+            .unwrap_or_default()
+            .to_string())
+    }
 }
 
 #[async_std::main]

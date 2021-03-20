@@ -3,4 +3,7 @@ port = 8081
 projectroot = "repos"
 emoji_favicon = "💻"
 site_name = "My git repositories"
+# file to check for in the .git directory to decide wether to publicly show a repo
 export_ok = "git-daemon-export-ok"
+# base directory to clone repositories from
+clone_base = "https://git.alexwennerberg.com"

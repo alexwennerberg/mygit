@@ -25,6 +25,8 @@ pub struct Config {
     site_name: String,
     #[serde(default = "defaults::export_ok")]
     export_ok: String,
+    #[serde(default = "String::new")]
+    clone_base: String,
 }
 
 /// Defaults for the configuration options

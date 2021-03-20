@@ -482,6 +482,6 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/tree/:ref/item/:object_name")
         .get(repo_file);
     // Raw files, patch files
-    app.listen("127.0.0.1:8081").await?;
+    app.listen(format!("[::]:{}", CONFIG.port)).await?;
     Ok(())
 }

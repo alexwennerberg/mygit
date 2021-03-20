@@ -473,6 +473,7 @@ async fn main() -> Result<(), std::io::Error> {
         .serve_file("templates/static/style.css")?; // TODO configurable
     app.at("/:repo_name").get(repo_home);
     // ALSO do git pull at this url somehow ^
+    app.at("/:repo_name/").get(repo_home);
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);

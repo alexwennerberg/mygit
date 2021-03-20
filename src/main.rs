@@ -128,12 +128,6 @@ struct RepoHomeTemplate {
     readme_text: String,
 }
 
-#[derive(Template)]
-#[template(path = "repo-empty.html")]
-struct RepoEmptyTemplate {
-    repo: Repository,
-}
-
 fn repo_from_request(repo_name: &str) -> Result<Repository> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
@@ -154,10 +148,6 @@ async fn repo_home(req: Request<()>) -> tide::Result {
     }
 
     let repo = repo_from_request(&req.param("repo_name")?)?;
-    if repo.is_empty().unwrap() {
-        // we would not be able to find HEAD
-        return Ok(RepoEmptyTemplate { repo }.into());
-    }
 
     let mut format = ReadmeFormat::Plaintext;
     let readme_text = repo

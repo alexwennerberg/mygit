@@ -1,8 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{
-    Commit, Diff, DiffDelta, Reference, Repository, Tree, TreeEntry,
-};
+use git2::{Commit, Diff, DiffDelta, Reference, Repository, Tree, TreeEntry};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs;
@@ -135,8 +133,11 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
         .into_owned();
+    if repo_name.contains("..") {
+        // Prevent path traversal
+        return Err(tide::Error::from_str(400, "Invalid name"))
+    }
     let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
-    // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
     Repository::open(repo_path).or_else(|_| {
         Err(tide::Error::from_str(
             404,

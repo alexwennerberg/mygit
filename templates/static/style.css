@@ -1,6 +1,7 @@
 body {
-  max-width: 95ch;
   padding: 2ch;
+  padding-left: 4ch;
+  padding-right: 4ch;
   margin: auto;
   font-family: "Roboto", Helvetica, Arial, Sans-serif;
   word-wrap: break-word;
@@ -8,12 +9,24 @@ body {
   line-height: 1.5;
 }
 
+.readme {
+  max-width: 80ch;
+}
+
+a:visited {
+  color: blue;
+}
+
 .repo-last-updated {
   font-style: italic;
 }
 
-.repo-link, .git-reference, .permissions, .commit-hash, .commit-message{
+.repo-link, .git-reference, .permissions, .commit-hash, .filename, .filesize, .commit-message{
   font-family: "Roboto Mono", monospace;
+}
+
+.filesize  {
+  text-align: right;
 }
 
 .commit-hash {

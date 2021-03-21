@@ -2,18 +2,19 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <h2>{{ spec }}</h2>
+  <div>
+  <div> {{ spec }}</h2>
   <table>
     {% for entry in tree %}
     <tr>
       <td class="permissions">
         {{ entry.filemode()|unix_perms }}
       </td>
-      <td>
+      <td class="filename">
         <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{entry.name().unwrap()}}">
         {{ entry.name().unwrap() }}{% if entry.to_object(repo).unwrap().as_tree().is_some() %}/{% endif %}</a>
       </td>
-      <td>
+      <td class="filesize">
         {% let obj = entry.to_object(repo).unwrap() %}
         {% if obj.as_blob().is_some() %}
         {{ entry.to_object(repo).unwrap().into_blob().unwrap().content().len()|filesizeformat }}
@@ -22,4 +23,5 @@
     </tr>
     {% endfor %}
   </table>
+  </div>
 {% endblock %}

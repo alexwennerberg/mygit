@@ -350,6 +350,7 @@ struct RepoFileTemplate<'a> {
     repo: &'a Repository,
     tree_entry: &'a TreeEntry<'a>,
     file_text: &'a str,
+    spec: &'a str,
 }
 
 async fn repo_file(req: Request<()>) -> tide::Result {
@@ -399,6 +400,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         repo: &repo,
         tree_entry: &tree_entry,
         file_text: &output,
+        spec: &spec,
     };
     Ok(tmpl.into())
 }

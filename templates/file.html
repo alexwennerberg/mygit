@@ -2,7 +2,6 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  branch
-  <h2>{{tree_entry.name().unwrap()}}</h2>
+  <h3>{{tree_entry.name().unwrap()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
   {{file_text|safe}}
 {% endblock %}

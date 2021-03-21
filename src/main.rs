@@ -1,16 +1,15 @@
 use anyhow::Result;
 use askama::Template;
 use git2::{
-    Commit, Diff, DiffDelta, DiffFormat, Object, Oid, Reference, Repository, Tree, TreeEntry,
+    Commit, Diff, DiffDelta, Reference, Repository, Tree, TreeEntry,
 };
 use once_cell::sync::Lazy;
-use pico_args;
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
 use std::str;
-use syntect::highlighting::{Color, ThemeSet};
-use syntect::parsing::{SyntaxReference, SyntaxSet};
+use syntect::highlighting::ThemeSet;
+use syntect::parsing::SyntaxSet;
 use tide::Request;
 
 #[derive(Deserialize, Debug)]
@@ -79,7 +78,7 @@ fn args() -> Config {
     let config_filename = pargs
         .opt_value_from_str(["-c", "--config"])
         .unwrap()
-        .unwrap_or("mygit.toml".to_string());
+        .unwrap_or_else(|| "mygit.toml".to_string());
 
     let toml_text = fs::read_to_string(&config_filename).unwrap_or_else(|_| {
         tide::log::warn!(

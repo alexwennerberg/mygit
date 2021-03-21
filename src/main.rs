@@ -12,6 +12,8 @@ use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
 use tide::Request;
 
+mod errorpage;
+
 #[derive(Deserialize, Debug)]
 pub struct Config {
     #[serde(default = "defaults::port")]
@@ -129,14 +131,18 @@ struct RepoHomeTemplate {
     readme_text: String,
 }
 
-fn repo_from_request(repo_name: &str) -> Result<Repository> {
+fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
         .into_owned();
     let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
     // TODO CLEAN PATH! VERY IMPORTANT! DONT FORGET!
-    let r = Repository::open(repo_path)?;
-    Ok(r)
+    Repository::open(repo_path).or_else(|_| {
+        Err(tide::Error::from_str(
+            404,
+            "This repository does not exist.",
+        ))
+    })
 }
 
 async fn repo_home(req: Request<()>) -> tide::Result {
@@ -468,6 +474,7 @@ mod filters {
 async fn main() -> Result<(), std::io::Error> {
     tide::log::start();
     let mut app = tide::new();
+    app.with(errorpage::ErrorToErrorpage);
     app.at("/").get(index);
     app.at("/robots.txt")
         .serve_file("templates/static/robots.txt")?; // TODO configurable

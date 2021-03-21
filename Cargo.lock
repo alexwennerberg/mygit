@@ -1167,6 +1167,7 @@ dependencies = [
  "askama",
  "askama_tide",
  "async-std",
+ "async-trait",
  "chrono",
  "git2",
  "once_cell",

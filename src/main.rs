@@ -135,7 +135,7 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
         .into_owned();
     if repo_name.contains("..") {
         // Prevent path traversal
-        return Err(tide::Error::from_str(400, "Invalid name"))
+        return Err(tide::Error::from_str(400, "Invalid name"));
     }
     let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
     Repository::open(repo_path).or_else(|_| {

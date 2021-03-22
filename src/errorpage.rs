@@ -12,17 +12,18 @@ struct ErrorTemplate {
 pub struct ErrorToErrorpage;
 
 #[async_trait::async_trait]
-impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpage{
+impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpage {
     async fn handle(&self, req: Request<State>, next: Next<'_, State>) -> tide::Result {
         let resource = req.url().path().to_string();
         let mut response = next.run(req).await;
         if let Some(err) = response.take_error() {
             let status = err.status();
-            response = ErrorTemplate{
+            response = ErrorTemplate {
                 resource,
                 status,
                 message: err.into_inner().to_string(),
-            }.into();
+            }
+            .into();
             response.set_status(status);
         }
 

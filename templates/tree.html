@@ -11,7 +11,7 @@
         {{ entry.filemode()|unix_perms }}
       </td>
       <td class="filename">
-        <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{entry.name().unwrap()}}">
+        <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{path.join(entry.name().unwrap()).to_string_lossy()}}">
         {{ entry.name().unwrap() }}{% if entry.to_object(repo).unwrap().as_tree().is_some() %}/{% endif %}</a>
       </td>
       <td class="filesize">

@@ -100,6 +100,7 @@ fn args() -> Config {
 #[template(path = "index.html")] // using the template in this path, relative
 struct IndexTemplate {
     repos: Vec<Repository>,
+    site_name: String,
 }
 
 async fn index(_req: Request<()>) -> tide::Result {
@@ -117,7 +118,10 @@ async fn index(_req: Request<()>) -> tide::Result {
         })
         .map_err(|e| tide::log::warn!("can not read repositories: {}", e))
         .unwrap_or_default();
-    let index_template = IndexTemplate { repos };
+    let index_template = IndexTemplate {
+        repos,
+        site_name: CONFIG.site_name.to_owned(),
+    };
 
     Ok(index_template.into())
 }

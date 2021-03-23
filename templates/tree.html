@@ -3,7 +3,11 @@
 {% block content %}
   {% include "repo-navbar.html" %}
   <div>
+    {% if path.to_string_lossy() != "" %}
+    <h3>{{path.to_string_lossy()}}/@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}<a></h3>
+    {% else %}
   <h3>{{ spec }}</h3>
+  {% endif %}
   <table>
     {% for entry in tree %}
     <tr>

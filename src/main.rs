@@ -137,6 +137,7 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
         // Prevent path traversal
         return Err(tide::Error::from_str(400, "Invalid name"));
     }
+    // TODO: check for export_ok file
     let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
     Repository::open(repo_path).or_else(|_| {
         Err(tide::Error::from_str(
@@ -148,8 +149,6 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
 
 async fn repo_home(req: Request<()>) -> tide::Result {
     use pulldown_cmark::{escape::escape_html, html::push_html, Options, Parser};
-
-    // TODO check headers to see if this is a git clone, if it is, redirect to .git
 
     enum ReadmeFormat {
         Plaintext,
@@ -425,10 +424,44 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     Ok(tmpl)
 }
 
-async fn git_clone(req: Request<()>) -> tide::Result {
-    let repo = req.param("repo_name")?;
-    println!("{}", repo);
-    Ok("adsf".into())
+async fn git_data(req: Request<()>) -> tide::Result {
+    match repo_from_request(req.param("repo_name")?) {
+        Ok(repo) => {
+            let path = req
+                .url()
+                .path()
+                .strip_prefix(&format!("/{}/", req.param("repo_name").unwrap()))
+                .unwrap_or_default();
+            let path = repo.path().join(path);
+
+            if !path.starts_with(repo.path()) {
+                // that path got us outside of the repository structure somehow
+                tide::log::warn!("Attempt to acces file outside of repo dir: {:?}", path);
+                Err(tide::Error::from_str(
+                    403,
+                    "You do not have access to this file.",
+                ))
+            } else if !path.is_file() {
+                // Either the requested resource does not exist or it is not
+                // a file, i.e. a directory.
+                Err(tide::Error::from_str(
+                    404,
+                    "The file you tried to access does not exist.",
+                ))
+            } else {
+                // ok - inside the repo directory
+                let mut resp = tide::Response::new(200);
+                let mut body = tide::Body::from_file(path).await?;
+                body.set_mime("text/plain; charset=utf-8");
+                resp.set_body(body);
+                Ok(resp)
+            }
+        }
+        Err(_) => Err(tide::Error::from_str(
+            404,
+            "This repository does not exist.",
+        )),
+    }
 }
 
 mod filters {
@@ -504,8 +537,9 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name").get(repo_home);
     app.at("/:repo_name/").get(repo_home);
     // git clone stuff -- handle thse urls
-    // app.at("/:repo_name/info/refs")
-    // app.at("/:repo_name/objects")
+    app.at("/:repo_name/info/refs").get(git_data);
+    app.at("/:repo_name/HEAD").get(git_data);
+    app.at("/:repo_name/objects/*obj").get(git_data);
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);

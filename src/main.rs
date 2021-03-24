@@ -149,6 +149,8 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
 async fn repo_home(req: Request<()>) -> tide::Result {
     use pulldown_cmark::{escape::escape_html, html::push_html, Options, Parser};
 
+    // TODO check headers to see if this is a git clone, if it is, redirect to .git
+
     enum ReadmeFormat {
         Plaintext,
         Html,
@@ -423,6 +425,12 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     Ok(tmpl)
 }
 
+async fn git_clone(req: Request<()>) -> tide::Result {
+    let repo = req.param("repo_name")?;
+    println!("{}", repo);
+    Ok("adsf".into())
+}
+
 mod filters {
     use super::*;
 
@@ -494,8 +502,10 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/style.css")
         .serve_file("templates/static/style.css")?; // TODO configurable
     app.at("/:repo_name").get(repo_home);
-    // ALSO do git pull at this url somehow ^
     app.at("/:repo_name/").get(repo_home);
+    // git clone stuff -- handle thse urls
+    // app.at("/:repo_name/info/refs")
+    // app.at("/:repo_name/objects")
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
@@ -506,5 +516,6 @@ async fn main() -> Result<(), std::io::Error> {
         .get(repo_file);
     // Raw files, patch files
     app.listen(format!("[::]:{}", CONFIG.port)).await?;
+    // app.all 404
     Ok(())
 }

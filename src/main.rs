@@ -133,18 +133,34 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
     let repo_name = percent_encoding::percent_decode_str(repo_name)
         .decode_utf8_lossy()
         .into_owned();
-    if repo_name.contains("..") {
-        // Prevent path traversal
-        return Err(tide::Error::from_str(400, "Invalid name"));
-    }
-    // TODO: check for export_ok file
+
     let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
-    Repository::open(repo_path).or_else(|_| {
+
+    // prevent path traversal
+    if !repo_path.starts_with(&CONFIG.projectroot) {
+        return Err(tide::Error::from_str(
+            403,
+            "You do not have access to this resource.",
+        ));
+    }
+
+    let repo = Repository::open(repo_path).or_else(|_| {
         Err(tide::Error::from_str(
             404,
             "This repository does not exist.",
         ))
-    })
+    })?;
+
+    if !repo.path().join(&CONFIG.export_ok).exists() {
+        // outside users should not be able to tell the difference between
+        // nonexistent and existing but forbidden repos, so not using 403
+        Err(tide::Error::from_str(
+            404,
+            "This repository does not exist.",
+        ))
+    } else {
+        Ok(repo)
+    }
 }
 
 async fn repo_home(req: Request<()>) -> tide::Result {

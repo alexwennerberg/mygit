@@ -41,6 +41,8 @@ The simplest way to accept patches when hosting a Git repo in this manner is thr
 I am working on a sibling project to this that handles mailing list archives for exactly this purpose:
 https://git.sr.ht/~aw/rusty-inbox
 
+I'm still deciding if I want that project merged into this one. I am considering it to simplify deployment and provide an all-in-one easy to deploy solution
+
 ## Contributing
 * [ticket tracker](https://todo.sr.ht/~aw/mygit)
 * [patches](https://lists.sr.ht/~aw/patches)

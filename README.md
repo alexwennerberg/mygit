@@ -3,6 +3,8 @@ A small self-hosted git project hub
 
 Making self-hosting email-based git workflows simple and easy (WIP -- no email support yet, git support incomplete)
 
+Live demo at https://git.alexwennerberg.com
+
 ## Deploying
 Build your binary with `cargo build --release`. Then probably move it somewhere sensible so it's in your $PATH or use `cargo install --release`. Packages and prebuilt binaries are TBD.
 

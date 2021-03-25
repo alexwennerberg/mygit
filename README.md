@@ -1,5 +1,7 @@
 # mygit
-A small self-hosted git server; a Rust, non-cgi alternative to git-web and cgit
+A small self-hosted git project hub
+
+Making self-hosting email-based git workflows simple and easy (WIP -- no email support yet, git support incomplete)
 
 ## Deploying
 Build your binary with `cargo build --release`. Then probably move it somewhere sensible so it's in your $PATH or use `cargo install --release`. Packages and prebuilt binaries are TBD.

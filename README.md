@@ -15,6 +15,8 @@ To initialize a repo, you'll need to run a few commands. I'm using a self-hosted
 git init --bare mygit
 cd mygit
 touch git-daemon-export-ok
+# update "dumb http" server on updates
+mv hooks/post-update.sample hooks/post-update
 ```
 Update the `description` file with a description of the repository
 

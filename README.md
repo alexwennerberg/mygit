@@ -42,6 +42,5 @@ I am working on a sibling project to this that handles mailing list archives for
 https://git.sr.ht/~aw/rusty-inbox
 
 ## Contributing
-This project is on sr.ht until I can get it self-hosted. 
 * [ticket tracker](https://todo.sr.ht/~aw/mygit)
 * [patches](https://lists.sr.ht/~aw/patches)

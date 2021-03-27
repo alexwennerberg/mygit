@@ -1,79 +1,80 @@
 body {
-  padding: 2ch;
-  padding-left: 4ch;
-  padding-right: 4ch;
-  margin: auto;
-  font-family: "Roboto", Helvetica, Arial, Sans-serif;
-  word-wrap: break-word;
-  background-color: white;
-  line-height: 1.5;
+    padding: 2ch;
+    padding-left: 4ch;
+    padding-right: 4ch;
+    margin: auto;
+    font-family: "Roboto", Helvetica, Arial, Sans-serif;
+    word-wrap: break-word;
+    background-color: white;
+    line-height: 1.5;
 }
 
 .readme {
-  max-width: 80ch;
+    max-width: 80ch;
 }
 
 a:visited {
-  color: blue;
+    color: blue;
 }
 
 .repo-last-updated {
-  font-style: italic;
+    font-style: italic;
 }
 
 .repo-link, .git-reference, .permissions, .commit-hash, .filename, .filesize, .commit-message{
-  font-family: "Roboto Mono", monospace;
+    font-family: "Roboto Mono", monospace;
 }
 
-.filesize  {
-  text-align: right;
+.filesize {
+    text-align: right;
 }
 
 .commit-hash {
-  display: inline
+    display: inline
 }
 
 .footer {
-  text-align: center;
-  font-style: italic;
-  font-size: .9rem;
+    text-align: center;
+    font-style: italic;
+    font-size: .9rem;
 }
 
 .line {
- display: inline-block;
- width: 4em;
- margin-right: .7em;
- text-align: right;
- text-decoration: none;
- -webkit-touch-callout: none; /* iOS Safari */
- -webkit-user-select: none; /* Safari */
- -khtml-user-select: none; /* Konqueror HTML */
- -moz-user-select: none; /* Old versions of Firefox */
- -ms-user-select: none; /* Internet Explorer/Edge */
- user-select: none; /* Non-prefixed version, currently */
+    display: inline-block;
+    width: 4em;
+    margin-right: .7em;
+    text-align: right;
+    text-decoration: none;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently */
 }
 
 :target {
-  background: #FFFACD;
+    background: #FFFACD;
 }
 
 .clone-url {
-  font-family: "Roboto Mono", monospace;
-  -webkit-user-select: all; /* Safari */
-  user-select: all; /* Standard syntax */
+    font-family: "Roboto Mono", monospace;
+    -webkit-user-select: all; /* Safari */
+    user-select: all; /* Standard syntax */
 }
 
 hr.thin {
-  border: 0;
-  height: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border: 0;
+    height: 0;
+    /* top border for light color scheme */
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    /* bottom border for dark color scheme */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 h1, h2, h3 {
-   margin: 0px;
+     margin: 0px;
 }
-
 
 pre {
     line-height: 1.2;
@@ -84,14 +85,14 @@ pre {
 }
 
 tr:hover {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
 
 td {
-  white-space: nowrap;
-  margin: 0px;
-  border-style:hidden;
-  padding: 0;
+    white-space: nowrap;
+    margin: 0px;
+    border-style:hidden;
+    padding: 0;
 }
 
 table td {
@@ -99,16 +100,31 @@ table td {
 }
 
 table.core {
-  width: 100%;
-  border-collapse: collapse;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 @media only screen and (max-width: 600px) {
-  body {
-    font-size: 16px;
-  }
+    body {
+        font-size: 16px;
+    }
 
-  .repo-description, .repo-last-updated, .commit-author-email, .commit-date {
-    display: none;
-  }
+    .repo-description, .repo-last-updated, .commit-author-email, .commit-date {
+        display: none;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #212529;
+        color: #f8f9fa;
+    }
+
+    :target {
+        background: #ffffff;
+    }
+
+    tr:hover {
+        background-color: #0f0f0f;
+    }
 }

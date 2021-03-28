@@ -24,6 +24,14 @@ impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpag
                 message: err.into_inner().to_string(),
             }
             .into();
+            if status == 405 {
+                // The origin server MUST generate an Allow header field in
+                // a 405 response containing a list of the target
+                // resource's currently supported methods. - RFC 7231§6.5.5
+                //
+                // We only ever support GET requests.
+                response.insert_header("Allow", "GET");
+            }
             response.set_status(status);
         }
 

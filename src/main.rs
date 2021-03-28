@@ -7,7 +7,7 @@ use std::fs;
 use std::path::Path;
 use std::str;
 use syntect::parsing::SyntaxSet;
-use tide::Request;
+use tide::{Request, Response};
 
 mod errorpage;
 
@@ -400,7 +400,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .find_syntax_by_extension(extension)
         .unwrap_or_else(|| syntax_set.find_syntax_plain_text());
     let tmpl = match tree_entry.to_object(&repo)?.into_tree() {
-	// this is a subtree
+        // this is a subtree
         Ok(tree) => RepoTreeTemplate {
             repo: &repo,
             tree,
@@ -410,19 +410,28 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .into(),
         // this is not a subtree, so it should be a blob i.e. file
         Err(tree_obj) => {
-            use syntect::{html::{ClassedHTMLGenerator, ClassStyle}, util::LinesWithEndings};
+            use syntect::{
+                html::{ClassStyle, ClassedHTMLGenerator},
+                util::LinesWithEndings,
+            };
 
             // get file contents from git object
             let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
             // create a highlighter that uses CSS classes so we can use prefers-color-scheme
-            let mut highlighter = ClassedHTMLGenerator::new_with_class_style(&syntax, &syntax_set, ClassStyle::SpacedPrefixed{prefix:"code"});
-            LinesWithEndings::from(file_string).for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
+            let mut highlighter = ClassedHTMLGenerator::new_with_class_style(
+                &syntax,
+                &syntax_set,
+                ClassStyle::SpacedPrefixed { prefix: "code" },
+            );
+            LinesWithEndings::from(file_string)
+                .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
 
             let mut output = String::from("<pre>\n");
             for (n, line) in highlighter.finalize().lines().enumerate() {
                 output.push_str(&format!(
                     "<a href='#L{0}' id='L{0}' class='line'>{0}</a>{1}\n",
-                    n + 1, line
+                    n + 1,
+                    line
                 ));
             }
             output.push_str("</pre>\n");
@@ -551,10 +560,12 @@ async fn main() -> Result<(), std::io::Error> {
         .serve_file("templates/static/style.css")?; // TODO configurable
     app.at("/:repo_name").get(repo_home);
     app.at("/:repo_name/").get(repo_home);
-    // git clone stuff -- handle thse urls
+
+    // git clone stuff
     app.at("/:repo_name/info/refs").get(git_data);
     app.at("/:repo_name/HEAD").get(git_data);
     app.at("/:repo_name/objects/*obj").get(git_data);
+
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
@@ -563,8 +574,10 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/tree/:ref").get(repo_tree);
     app.at("/:repo_name/tree/:ref/item/*object_name")
         .get(repo_file);
+    app.at("*")
+        .get(|_| async { Result::<Response, tide::Error>::Err(tide::Error::from_str(404, "This page does not exist.")) })
+        .all(|_| async { Result::<Response, tide::Error>::Err(tide::Error::from_str(405, "This method is not allowed.")) });
     // Raw files, patch files
     app.listen(format!("[::]:{}", CONFIG.port)).await?;
-    // app.all 404
     Ok(())
 }

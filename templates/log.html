@@ -2,6 +2,7 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
+  <div class="main"
   <h3>{{branch}}</h3>
   <table>
   {% for commit in commits %} 
@@ -14,5 +15,6 @@
   </tr>
   {% endfor %}
   </table>
+  </div>
 {% endblock %}
 

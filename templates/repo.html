@@ -2,7 +2,7 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <div class="readme">
+  <div class="readme main">
   {% if !readme_text.is_empty() -%}
     {{ readme_text|safe }}
   {% else -%}

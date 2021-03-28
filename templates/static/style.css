@@ -1,8 +1,7 @@
 body {
-    padding: 2ch;
-    padding-left: 4ch;
-    padding-right: 4ch;
-    margin: auto;
+    padding: 0;
+    border-top: 3px solid black;
+    margin: 0;
     font-family: "Archivo", Helvetica, Arial, Sans-serif;
     word-wrap: break-word;
     background-color: white;
@@ -37,6 +36,7 @@ a:visited {
     text-align: center;
     font-style: italic;
     font-size: .9rem;
+    border-top: 1px solid black;
 }
 
 .line {
@@ -61,6 +61,10 @@ a:visited {
     font-family: "Roboto Mono", monospace;
     -webkit-user-select: all; /* Safari */
     user-select: all; /* Standard syntax */
+    text-align: right;
+    padding-left: 2px;
+    padding-right: 2px;
+    display:inline-block
 }
 
 hr.thin {
@@ -88,6 +92,10 @@ tr:hover {
     background-color: #f0f0f0;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
 td {
     white-space: nowrap;
     margin: 0px;
@@ -99,10 +107,27 @@ table td {
     padding: 0 0.1em;
 }
 
-table.core {
-    width: 100%;
+table {
     border-collapse: collapse;
 }
+
+#navbar {
+  /* background-color: #ededed; */
+  padding-left: 2ch;
+  padding-right: 2ch;
+}
+
+.links {
+  background-color: #e8e8e8;
+  display: block;
+  padding-left: 2px;
+}
+
+.main {
+  padding-left: 2ch;
+  padding-right: 2ch;
+}
+
 
 @media only screen and (max-width: 600px) {
     body {

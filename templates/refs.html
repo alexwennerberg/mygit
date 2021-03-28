@@ -2,7 +2,6 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <div class="main">
   <h2>Branches</h2>
   <table>
   {% for branch in branches %}
@@ -19,5 +18,4 @@
   <tr><td class="git-reference"><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{tag.shorthand().unwrap()}}">{{ tag.shorthand().unwrap() }}</a></td></tr>
   {% endfor %}
   </table>
-  </div>
 {% endblock %}

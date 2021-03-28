@@ -15,24 +15,35 @@ pub struct ErrorToErrorpage;
 impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpage {
     async fn handle(&self, req: Request<State>, next: Next<'_, State>) -> tide::Result {
         let resource = req.url().path().to_string();
+        let method = req.method();
         let mut response = next.run(req).await;
         if let Some(err) = response.take_error() {
             let status = err.status();
-            response = ErrorTemplate {
-                resource,
-                status,
-                message: err.into_inner().to_string(),
+
+            if method == tide::http::Method::Head {
+                // the server MUST NOT send a message body in the response
+                // - RFC 7231 § 4.3.2
+                response.take_body();
+            } else {
+                response = ErrorTemplate {
+                    resource,
+                    status,
+                    message: err.into_inner().to_string(),
+                }
+                .into();
+                response.set_status(status);
             }
-            .into();
+
             if status == 405 {
                 // The origin server MUST generate an Allow header field in
                 // a 405 response containing a list of the target
-                // resource's currently supported methods. - RFC 7231§6.5.5
+                // resource's currently supported methods.
+                // - RFC 7231 § 6.5.5
                 //
-                // We only ever support GET requests.
-                response.insert_header("Allow", "GET");
+                // We only ever support GET or HEAD requests.
+                // tide adds support for HEAD automatically if we implement GET
+                response.insert_header("Allow", "GET, HEAD");
             }
-            response.set_status(status);
         }
 
         Ok(response)

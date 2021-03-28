@@ -3,7 +3,8 @@ use askama::Template;
 use git2::{Commit, Diff, DiffDelta, Reference, Repository, Tree, TreeEntry};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
-use std::fs;
+use std::fs::{self, File};
+use std::io::Read;
 use std::path::Path;
 use std::str;
 use syntect::parsing::SyntaxSet;
@@ -468,10 +469,7 @@ async fn git_data(req: Request<()>) -> tide::Result {
             } else if !path.is_file() {
                 // Either the requested resource does not exist or it is not
                 // a file, i.e. a directory.
-                Err(tide::Error::from_str(
-                    404,
-                    "The file you tried to access does not exist.",
-                ))
+                Err(tide::Error::from_str(404, "This page does not exist."))
             } else {
                 // ok - inside the repo directory
                 let mut resp = tide::Response::new(200);
@@ -485,6 +483,89 @@ async fn git_data(req: Request<()>) -> tide::Result {
             404,
             "This repository does not exist.",
         )),
+    }
+}
+
+/// Serve a file from ./templates/static/
+async fn static_resource(req: Request<()>) -> tide::Result {
+    use tide::http::conditional::{IfModifiedSince, LastModified};
+
+    // only use a File handle here because we might not need to load the file
+    let file_mime_option = match req.url().path() {
+        "/style.css" => Some((
+            File::open("templates/static/style.css").unwrap(),
+            tide::http::mime::CSS,
+        )),
+        "/robots.txt" => Some((
+            File::open("templates/static/robots.txt").unwrap(),
+            tide::http::mime::PLAIN,
+        )),
+        _ => None,
+    };
+
+    match file_mime_option {
+        Some((mut file, mime)) => {
+            let metadata = file.metadata().unwrap();
+            let last_modified = metadata.modified().unwrap();
+
+            let header = IfModifiedSince::from_headers(&req).unwrap();
+
+            // check cache validating headers
+            if matches!(header, Some(date) if IfModifiedSince::new(last_modified) <= date) {
+                // the file has not changed
+                let mut response = Response::new(304);
+                response.set_content_type(mime);
+                LastModified::new(last_modified).apply(&mut response);
+
+                /*
+                A server MAY send a Content-Length header field in a 304
+                response to a conditional GET request; a server MUST NOT send
+                Content-Length in such a response unless its field-value equals
+                the decimal number of octets that would have been sent in the
+                payload body of a 200 response to the same request.
+                - RFC 7230 § 3.3.2
+                */
+                response.insert_header("Content-Length", metadata.len().to_string());
+
+                return Ok(response);
+            }
+
+            let mut response = Response::new(200);
+
+            match req.method() {
+                tide::http::Method::Head => {
+                    /*
+                    A server MAY send a Content-Length header field in a
+                    response to a HEAD request; a server MUST NOT send
+                    Content-Length in such a response unless its field-value
+                    equals the decimal number of octets that would have been
+                    sent in the payload body of a response if the same request
+                    had used the GET method.
+                    - RFC 7230 § 3.3.2
+                    */
+                    response.insert_header(
+                        "Content-Length",
+                        file.metadata().unwrap().len().to_string(),
+                    );
+                }
+                tide::http::Method::Get => {
+                    // load the file from disk
+                    let mut content = String::new();
+                    file.read_to_string(&mut content).unwrap();
+                    response.set_body(content);
+                }
+                _ => return Err(tide::Error::from_str(405, "")),
+            }
+
+            response.set_content_type(mime);
+            LastModified::new(last_modified).apply(&mut response);
+            Ok(response)
+        }
+        None if req.method() == tide::http::Method::Get => {
+            Err(tide::Error::from_str(404, "This page does not exist."))
+        }
+        // issue a 405 error since this is used as the catchall
+        None => Err(tide::Error::from_str(405, "")),
     }
 }
 
@@ -554,10 +635,7 @@ async fn main() -> Result<(), std::io::Error> {
     let mut app = tide::new();
     app.with(errorpage::ErrorToErrorpage);
     app.at("/").get(index);
-    app.at("/robots.txt")
-        .serve_file("templates/static/robots.txt")?; // TODO configurable
-    app.at("/style.css")
-        .serve_file("templates/static/style.css")?; // TODO configurable
+
     app.at("/:repo_name").get(repo_home);
     app.at("/:repo_name/").get(repo_home);
 
@@ -566,17 +644,17 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/HEAD").get(git_data);
     app.at("/:repo_name/objects/*obj").get(git_data);
 
+    // web pages
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
-    app.at("/:repo_name/log/:ref").get(repo_log); // ref optional
+    app.at("/:repo_name/log/:ref").get(repo_log); // ref is optional
     app.at("/:repo_name/tree").get(repo_tree);
-    app.at("/:repo_name/tree/:ref").get(repo_tree);
+    app.at("/:repo_name/tree/:ref").get(repo_tree); // ref is optional
     app.at("/:repo_name/tree/:ref/item/*object_name")
         .get(repo_file);
-    app.at("*")
-        .get(|_| async { Result::<Response, tide::Error>::Err(tide::Error::from_str(404, "This page does not exist.")) })
-        .all(|_| async { Result::<Response, tide::Error>::Err(tide::Error::from_str(405, "This method is not allowed.")) });
+
+    app.at("*").all(static_resource);
     // Raw files, patch files
     app.listen(format!("[::]:{}", CONFIG.port)).await?;
     Ok(())

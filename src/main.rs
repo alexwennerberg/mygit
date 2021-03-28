@@ -6,7 +6,6 @@ use serde::Deserialize;
 use std::fs;
 use std::path::Path;
 use std::str;
-use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
 use tide::Request;
 
@@ -392,17 +391,16 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     // TODO make sure I am escaping html properly here
     // TODO allow disabling of syntax highlighting
     // TODO -- dont pull in memory, use iterators if possible
-    let syntax_set = SyntaxSet::load_defaults_nonewlines();
+    let syntax_set = SyntaxSet::load_defaults_newlines();
     let extension = path
         .extension()
         .and_then(std::ffi::OsStr::to_str)
         .unwrap_or_default();
-    let syntax_reference = syntax_set
+    let syntax = syntax_set
         .find_syntax_by_extension(extension)
         .unwrap_or_else(|| syntax_set.find_syntax_plain_text());
-    let ts = ThemeSet::load_defaults();
-    let theme = &ts.themes["InspiredGitHub"]; // TODO make customizable
     let tmpl = match tree_entry.to_object(&repo)?.into_tree() {
+	// this is a subtree
         Ok(tree) => RepoTreeTemplate {
             repo: &repo,
             tree,
@@ -410,21 +408,22 @@ async fn repo_file(req: Request<()>) -> tide::Result {
             spec: &spec,
         }
         .into(),
+        // this is not a subtree, so it should be a blob i.e. file
         Err(tree_obj) => {
+            use syntect::{html::{ClassedHTMLGenerator, ClassStyle}, util::LinesWithEndings};
+
+            // get file contents from git object
             let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
-            let mut highlighter = syntect::easy::HighlightLines::new(&syntax_reference, &theme);
-            let (mut output, bg) = syntect::html::start_highlighted_html_snippet(&theme);
-            for (n, line) in syntect::util::LinesWithEndings::from(file_string).enumerate() {
-                let regions = highlighter.highlight(line, &syntax_set);
+            // create a highlighter that uses CSS classes so we can use prefers-color-scheme
+            let mut highlighter = ClassedHTMLGenerator::new_with_class_style(&syntax, &syntax_set, ClassStyle::SpacedPrefixed{prefix:"code"});
+            LinesWithEndings::from(file_string).for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
+
+            let mut output = String::from("<pre>\n");
+            for (n, line) in highlighter.finalize().lines().enumerate() {
                 output.push_str(&format!(
-                    "<a href='#L{0}' id='L{0}' class='line'>{0}</a>",
-                    n + 1
+                    "<a href='#L{0}' id='L{0}' class='line'>{0}</a>{1}\n",
+                    n + 1, line
                 ));
-                syntect::html::append_highlighted_html_for_styled_line(
-                    &regions[..],
-                    syntect::html::IncludeBackground::IfDifferent(bg),
-                    &mut output,
-                );
             }
             output.push_str("</pre>\n");
 

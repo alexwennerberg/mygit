@@ -11,6 +11,7 @@ use syntect::parsing::SyntaxSet;
 use tide::{Request, Response};
 
 mod errorpage;
+mod mail;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -656,6 +657,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     app.at("*").all(static_resource);
     // Raw files, patch files
+    app.at("/mail").get(mail::list_threads);
     app.listen(format!("[::]:{}", CONFIG.port)).await?;
     Ok(())
 }

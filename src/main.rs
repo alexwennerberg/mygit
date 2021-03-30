@@ -428,12 +428,21 @@ async fn repo_file(req: Request<()>) -> tide::Result {
             LinesWithEndings::from(file_string)
                 .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
 
+            // use oid so it is a permalink
+            let prefix = format!(
+                "/{}/tree/{}/item/{}",
+                req.param("repo_name").unwrap(),
+                commit.id(),
+                path.display()
+            );
+
             let mut output = String::from("<pre>\n");
             for (n, line) in highlighter.finalize().lines().enumerate() {
                 output.push_str(&format!(
-                    "<a href='#L{0}' id='L{0}' class='line'>{0}</a>{1}\n",
+                    "<a href='{1}#L{0}' id='L{0}' class='line'>{0}</a>{2}\n",
                     n + 1,
-                    line
+                    prefix,
+                    line,
                 ));
             }
             output.push_str("</pre>\n");

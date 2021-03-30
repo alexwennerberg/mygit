@@ -3,5 +3,6 @@ My Mailing list:
 all my threads
 
 {% for email in emails %}
-{{email.get_body().unwrap()}}
+<br>
+<a href="">{{email.subject}}</a>
 {% endfor %}

@@ -423,7 +423,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
             let mut highlighter = ClassedHTMLGenerator::new_with_class_style(
                 &syntax,
                 &syntax_set,
-                ClassStyle::SpacedPrefixed { prefix: "code" },
+                ClassStyle::Spaced,
             );
             LinesWithEndings::from(file_string)
                 .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));

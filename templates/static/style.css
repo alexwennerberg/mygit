@@ -34,7 +34,7 @@ body {
     font-size: .9rem;
 }
 
-.line {
+a.line {
     display: inline-block;
     width: 4em;
     margin-right: .7em;

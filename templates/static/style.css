@@ -132,7 +132,7 @@ hr.thin {
     color: #93a1a1; /* Solarized base1 */
 }
 
-:target, tr:hover, .links, .meta.paragraph.markdown, .meta.dummy.line-break {
+:target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
     background-color: #eee8d5; /* Solarized base2 */
 }
 
@@ -148,7 +148,7 @@ body, .code {
     color: #cb4b16; /* Solarized orange */
 }
 
-.constant.character.escape, .support.function.construct, .keyword.other.new, .punctuation.separator.continuation, .other.package.exclude, .other.remove, .punctuation.section.group.tex, .punctuation.definition.arguments.begin.latex, .punctuation.definition.arguments.end.latex, .punctuation.definition.arguments.latex, .punctuation.definition.constant.math.tex, .punctuation.definition.string.begin.tex, .punctuation.definition.string.end.tex, .variable.parameter.definition.label.latex, .punctuation.definition.logical-expression.shell, .markup.deleted, .markup.deleted.git_gutter {
+.constant.character.escape, .support.function.construct, .keyword.other.new, .punctuation.separator.continuation, .other.package.exclude, .other.remove, .punctuation.section.group.tex, .punctuation.definition.arguments.begin.latex, .punctuation.definition.arguments.end.latex, .punctuation.definition.arguments.latex, .punctuation.definition.constant.math.tex, .punctuation.definition.string.begin.tex, .punctuation.definition.string.end.tex, .variable.parameter.definition.label.latex, .punctuation.definition.logical-expression.shell, .markup.deleted, .markup.deleted.git_gutter, .meta.diff.header.from-file {
     color: #dc322f; /* Solarized red */
 }
 
@@ -168,7 +168,7 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
     color: #2aa198; /* Solarized cyan */
 }
 
-.keyword, .storage, .support, .support.type, .support.class, .punctuation.definition.variable, .support.function, .keyword.other.special-method.ruby, .support.function.be.latex, .storage.type.class.python, .storage.type.function.python, .storage.modifier.global.python, .storage.modifier.c++, .markup.inserted, .markup.quote, .markup.inserted.git_gutter {
+.keyword, .storage, .support, .support.type, .support.class, .punctuation.definition.variable, .support.function, .keyword.other.special-method.ruby, .support.function.be.latex, .storage.type.class.python, .storage.type.function.python, .storage.modifier.global.python, .storage.modifier.cpp, .markup.inserted, .markup.quote, .markup.inserted.git_gutter, .meta.diff.header.to-file {
     color: #859900; /* Solarized green */
 }
 
@@ -199,7 +199,7 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
         color: #586e75; /* Solarized base01 */
     }
 
-    :target, tr:hover, .links, .meta.paragraph.markdown, .meta.dummy.line-break {
+    :target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
         background-color: #073642; /* Solarized base02 */
     }
 

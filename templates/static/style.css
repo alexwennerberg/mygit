@@ -24,10 +24,6 @@ body {
     text-align: right;
 }
 
-.commit-hash {
-    display: inline
-}
-
 .footer {
     text-align: center;
     font-style: italic;

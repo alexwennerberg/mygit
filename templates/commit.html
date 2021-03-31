@@ -2,9 +2,9 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <b>Commit:</b> <div class="commit-hash">{{commit.id()}}</div> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
+  <b>Commit:</b> <span class="commit-hash">{{commit.id()}}</span> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{commit.id()}}">tree</a>)
   <br>
-  <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent.id()}}"><div class="commit-hash">{{parent.id()}}</div></a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
+  <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent.id()}}" class="commit-hash">{{parent.id()}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
   <br>
   <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
   <br>
@@ -12,7 +12,5 @@
   <br>
   {% let stats = diff.stats().unwrap() %}
   {{stats.files_changed()}} files changed; {{stats.insertions()}} insertions {{stats.deletions()}} deletions
-  <div class="commit-message">
-  {{commit.message().unwrap()}} 
-  </div>
+  <pre class="commit-message">{{commit.message().unwrap()}}</pre>
 {% endblock %}

@@ -4,8 +4,10 @@
   {% include "repo-navbar.html" %}
   <b>Commit:</b> <span class="commit-hash">{{commit.id()}}</span> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{commit.id()}}">tree</a>)
   <br>
-  <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent.id()}}" class="commit-hash">{{parent.id()}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent.id()}}">tree</a>)
+  {% for parent_id in self.parent_ids() %}
+  <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent_id}}" class="commit-hash">{{parent_id}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent_id}}">tree</a>)
   <br>
+  {% endfor %}
   <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
   <br>
   <b>Date:</b> {{commit.time()|format_datetime("%c %z")}}
@@ -13,4 +15,6 @@
   {% let stats = diff.stats().unwrap() %}
   {{stats.files_changed()}} files changed; {{stats.insertions()}} insertions {{stats.deletions()}} deletions
   <pre class="commit-message">{{commit.message().unwrap()}}</pre>
+  <hr class="thin"/>
+  <pre id="diff">{{self.diff()|safe}}</pre>
 {% endblock %}

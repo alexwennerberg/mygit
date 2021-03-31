@@ -1,13 +1,18 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Diff, DiffDelta, Reference, Repository, Tree, TreeEntry};
+use git2::{Commit, Diff, Reference, Repository, Tree, TreeEntry};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs::{self, File};
 use std::io::Read;
 use std::path::Path;
 use std::str;
-use syntect::parsing::SyntaxSet;
+use syntect::{
+    html::{ClassStyle, ClassedHTMLGenerator},
+    parsing::SyntaxSet,
+    util::LinesWithEndings,
+};
+
 use tide::{Request, Response};
 
 mod errorpage;
@@ -65,6 +70,8 @@ Report bugs at https://todo.sr.ht/~aw/mygit
 ";
 
 static CONFIG: Lazy<Config> = Lazy::new(args);
+// so we only have to load this once to reduce startup time for syntax highlighting
+static SYNTAXES: Lazy<SyntaxSet> = Lazy::new(|| SyntaxSet::load_defaults_newlines());
 
 fn args() -> Config {
     // TODO cli
@@ -330,9 +337,49 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
 struct RepoCommitTemplate<'a> {
     repo: &'a Repository,
     commit: Commit<'a>,
-    parent: Commit<'a>,
     diff: &'a Diff<'a>,
-    deltas: Vec<DiffDelta<'a>>,
+}
+
+impl RepoCommitTemplate<'_> {
+    fn parent_ids(&self) -> Vec<git2::Oid> {
+        self.commit.parent_ids().collect()
+    }
+
+    fn diff(&self) -> String {
+        let mut buf = String::new();
+        self.diff
+            .print(
+                git2::DiffFormat::Patch,
+                |_delta, _hunk, line| match str::from_utf8(line.content()) {
+                    Ok(content) => {
+                        match line.origin() {
+                            'F' | 'H' => {}
+                            c @ ' ' | c @ '+' | c @ '-' | c @ '=' | c @ '<' | c @ '>' => {
+                                buf.push(c)
+                            }
+                            'B' | _ => unreachable!(),
+                        }
+                        pulldown_cmark::escape::escape_html(&mut buf, content).unwrap();
+                        true
+                    }
+                    Err(_) => {
+                        buf.push_str("Cannot display diff for binary data.");
+                        false
+                    }
+                },
+            )
+            .unwrap();
+
+        // highlight the diff
+        let syntax = SYNTAXES
+            .find_syntax_by_name("Diff")
+            .expect("diff syntax missing");
+        let mut highlighter =
+            ClassedHTMLGenerator::new_with_class_style(&syntax, &SYNTAXES, ClassStyle::Spaced);
+        LinesWithEndings::from(&buf)
+            .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
+        highlighter.finalize()
+    }
 }
 
 async fn repo_commit(req: Request<()>) -> tide::Result {
@@ -341,21 +388,22 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
         .revparse_single(req.param("commit")?)?
         .peel_to_commit()?;
 
-    let parent = repo
-        .revparse_single(&format!("{}^", commit.id()))?
-        .peel_to_commit()?;
+    // This is identical to getting "commit^" and on merges this will be the
+    // merged into branch before the merge.
+    let first_parent = commit.parent(0)?;
     // TODO root commit
-    // how to deal w multiple parents?
-    let diff = repo.diff_tree_to_tree(Some(&commit.tree()?), Some(&parent.tree()?), None)?;
-    let deltas = diff.deltas().collect();
+    let mut diff =
+        repo.diff_tree_to_tree(Some(&first_parent.tree()?), Some(&commit.tree()?), None)?;
+    let mut find_options = git2::DiffFindOptions::new();
+    // try to find moved/renamed files
+    find_options.all(true);
+    diff.find_similar(Some(&mut find_options)).unwrap();
 
     // TODO accept reference or commit id
     let tmpl = RepoCommitTemplate {
         repo: &repo,
         commit,
-        parent,
         diff: &diff,
-        deltas,
     };
     Ok(tmpl.into())
 }
@@ -382,14 +430,13 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     // TODO make sure I am escaping html properly here
     // TODO allow disabling of syntax highlighting
     // TODO -- dont pull in memory, use iterators if possible
-    let syntax_set = SyntaxSet::load_defaults_newlines();
     let extension = path
         .extension()
         .and_then(std::ffi::OsStr::to_str)
         .unwrap_or_default();
-    let syntax = syntax_set
+    let syntax = SYNTAXES
         .find_syntax_by_extension(extension)
-        .unwrap_or_else(|| syntax_set.find_syntax_plain_text());
+        .unwrap_or_else(|| SYNTAXES.find_syntax_plain_text());
     let tmpl = match tree_entry.to_object(&repo)?.into_tree() {
         // this is a subtree
         Ok(tree) => RepoTreeTemplate {
@@ -401,19 +448,11 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .into(),
         // this is not a subtree, so it should be a blob i.e. file
         Err(tree_obj) => {
-            use syntect::{
-                html::{ClassStyle, ClassedHTMLGenerator},
-                util::LinesWithEndings,
-            };
-
             // get file contents from git object
             let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
             // create a highlighter that uses CSS classes so we can use prefers-color-scheme
-            let mut highlighter = ClassedHTMLGenerator::new_with_class_style(
-                &syntax,
-                &syntax_set,
-                ClassStyle::Spaced,
-            );
+            let mut highlighter =
+                ClassedHTMLGenerator::new_with_class_style(&syntax, &SYNTAXES, ClassStyle::Spaced);
             LinesWithEndings::from(file_string)
                 .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
 

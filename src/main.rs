@@ -145,23 +145,12 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
         ));
     }
 
-    let repo = Repository::open(repo_path).or_else(|_| {
-        Err(tide::Error::from_str(
-            404,
-            "This repository does not exist.",
-        ))
-    })?;
-
-    if !repo.path().join(&CONFIG.export_ok).exists() {
+    Repository::open(repo_path)
+        .ok()
         // outside users should not be able to tell the difference between
         // nonexistent and existing but forbidden repos, so not using 403
-        Err(tide::Error::from_str(
-            404,
-            "This repository does not exist.",
-        ))
-    } else {
-        Ok(repo)
-    }
+        .filter(|repo| repo.path().join(&CONFIG.export_ok).exists())
+        .ok_or_else(|| tide::Error::from_str(404, "This repository does not exist."))
 }
 
 async fn repo_home(req: Request<()>) -> tide::Result {

@@ -674,6 +674,12 @@ async fn main() -> Result<(), std::io::Error> {
     app.with(errorpage::ErrorToErrorpage);
     app.at("/").get(index);
 
+    app.at("/style.css").get(static_resource);
+    app.at("/robots.txt").get(static_resource);
+
+    // Raw files, patch files
+    app.at("/mail").get(mail::list_threads);
+
     app.at("/:repo_name").get(repo_home);
     app.at("/:repo_name/").get(repo_home);
 
@@ -693,8 +699,6 @@ async fn main() -> Result<(), std::io::Error> {
         .get(repo_file);
 
     app.at("*").all(static_resource);
-    // Raw files, patch files
-    app.at("/mail").get(mail::list_threads);
     app.listen(format!("[::]:{}", CONFIG.port)).await?;
     Ok(())
 }

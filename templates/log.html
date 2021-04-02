@@ -2,6 +2,9 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
+  {% if next_page.is_some() %}
+  <a href="{{next_page.as_ref().unwrap()}}" style="float:right;">older commits &rarr;</a>
+  {% endif %}
   <h3>{{branch}}</h3>
   <table>
   {% for commit in commits %} 
@@ -14,5 +17,8 @@
   </tr>
   {% endfor %}
   </table>
+  {% if next_page.is_some() %}
+  <a href="{{next_page.as_ref().unwrap()}}">older commits &rarr;</a>
+  {% endif %}
 {% endblock %}
 

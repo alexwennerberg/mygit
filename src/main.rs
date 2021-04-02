@@ -32,6 +32,8 @@ pub struct Config {
     export_ok: String,
     #[serde(default = "String::new")]
     clone_base: String,
+    #[serde(default = "defaults::log_per_page")]
+    log_per_page: usize,
 }
 
 /// Defaults for the configuration options
@@ -51,6 +53,10 @@ mod defaults {
 
     pub fn export_ok() -> String {
         "git-daemon-export-ok".to_string()
+    }
+
+    pub fn log_per_page() -> usize {
+        100
     }
 }
 
@@ -222,6 +228,8 @@ struct RepoLogTemplate<'a> {
     repo: &'a Repository,
     commits: Vec<Commit<'a>>,
     branch: &'a str,
+    // the spec the user should be linked to to see the next page of commits
+    next_page: Option<String>,
 }
 
 async fn repo_log(req: Request<()>) -> tide::Result {
@@ -232,25 +240,41 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         url.path_segments_mut().unwrap().pop();
         return Ok(tide::Redirect::temporary(url.to_string()).into());
     }
-    let commits = if repo.is_shallow() {
+
+    let next_page_spec;
+    let mut commits = if repo.is_shallow() {
         tide::log::warn!("repository {:?} is only a shallow clone", repo.path());
+        next_page_spec = "".into();
         vec![repo.head()?.peel_to_commit().unwrap()]
     } else {
         let mut revwalk = repo.revwalk()?;
-        match req.param("ref") {
-            Ok(r) => {
-                revwalk.push_ref(&format!("refs/heads/{}", r))?;
-            }
-            _ => {
-                revwalk.push_head()?;
-            }
-        };
+        let r = req.param("ref").unwrap_or("HEAD");
+        revwalk.push(repo.revparse_single(r)?.peel_to_commit()?.id())?;
+
+        if let Some(i) = r.rfind('~') {
+            // there is a tilde, try to find a number too
+            let n = r[i + 1..].parse::<usize>().ok().unwrap_or(1);
+            next_page_spec = format!("{}~{}", &r[..i], n + CONFIG.log_per_page);
+        } else {
+            // there was no tilde
+            next_page_spec = format!("{}~{}", r, CONFIG.log_per_page);
+        }
+
         revwalk.set_sorting(git2::Sort::TIME).unwrap();
         revwalk
             .filter_map(|oid| repo.find_commit(oid.unwrap()).ok()) // TODO error handling
-            .take(100)
+            .take(CONFIG.log_per_page + 1)
             .collect()
     };
+    // check if there even is a next page
+    let next_page = if commits.len() < CONFIG.log_per_page + 1 {
+        None
+    } else {
+        // remove additional commit from next page check
+        commits.pop();
+        Some(next_page_spec)
+    };
+
     let head_branch = repo.head()?;
     let branch = req
         .param("ref")
@@ -261,6 +285,7 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         repo: &repo,
         commits,
         branch,
+        next_page,
     };
     Ok(tmpl.into())
 }

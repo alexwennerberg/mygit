@@ -2,10 +2,10 @@ use anyhow::Result;
 use askama::Template;
 use tide::Request;
 
-use std::fs;
 use std::borrow::Cow;
+use std::fs;
 
-use mailparse::{parse_mail, ParsedMail, MailHeaderMap};
+use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
 /* Mail related routes */
 
 // TODO create a thread object, a collection of references to emails
@@ -17,13 +17,13 @@ struct ListThreadsTemplate {
 }
 
 struct Email {
-    subject: String
+    subject: String,
 }
 
 impl Email {
     fn from_parsed(mail: &ParsedMail) -> Result<Self> {
         Ok(Email {
-            subject: mail.headers.get_first_value("Subject").unwrap()
+            subject: mail.headers.get_first_value("Subject").unwrap(),
         })
     }
 }

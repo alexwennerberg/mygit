@@ -309,7 +309,6 @@ struct RepoTreeTemplate<'a> {
 }
 
 async fn repo_tree(req: Request<()>) -> tide::Result {
-    // TODO handle subtrees
     let repo = repo_from_request(&req.param("repo_name")?)?;
     if repo.is_empty().unwrap() {
         // redirect to start page of repo
@@ -318,7 +317,6 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
         return Ok(tide::Redirect::temporary(url.to_string()).into());
     }
 
-    // TODO accept reference or commit id
     let head = repo.head()?;
     let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
@@ -399,7 +397,6 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
     find_options.all(true);
     diff.find_similar(Some(&mut find_options)).unwrap();
 
-    // TODO accept reference or commit id
     let tmpl = RepoCommitTemplate {
         repo: &repo,
         commit,
@@ -418,9 +415,8 @@ struct RepoFileTemplate<'a> {
 }
 
 async fn repo_file(req: Request<()>) -> tide::Result {
-    // TODO renmae for clarity
+    // TODO rename for clarity
     let repo = repo_from_request(req.param("repo_name")?)?;
-    // If directory -- show tree TODO
     let head = repo.head()?;
     let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;

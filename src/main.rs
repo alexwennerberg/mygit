@@ -413,10 +413,9 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
 
     // This is identical to getting "commit^" and on merges this will be the
     // merged into branch before the merge.
-    let first_parent = commit.parent(0)?;
-    // TODO root commit
-    let mut diff =
-        repo.diff_tree_to_tree(Some(&first_parent.tree()?), Some(&commit.tree()?), None)?;
+    let parent_tree = commit.parent(0).ok().map(|parent| parent.tree().unwrap());
+
+    let mut diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit.tree()?), None)?;
     let mut find_options = git2::DiffFindOptions::new();
     // try to find moved/renamed files
     find_options.all(true);

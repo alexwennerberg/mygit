@@ -8,7 +8,7 @@
   <tr>
     <td class="repo-link"><a href="{{repo|repo_name|urlencode_strict}}">{{repo|repo_name}}</a></td>
     <td class="repo-description">{{repo|description}}</td>
-    <!-- <td class="repo-last-updated">updated 2021-02-01</td> -->
+    <td class="repo-last-updated">last updated {{repo|last_modified|format_datetime("%Y-%m-%d")}}</td>
   </tr>
   {% endfor %}
   </table>

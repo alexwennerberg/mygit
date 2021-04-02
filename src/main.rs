@@ -685,6 +685,10 @@ mod filters {
             .unwrap_or_default()
             .to_string())
     }
+
+    pub fn last_modified(repo: &Repository) -> askama::Result<git2::Time> {
+        Ok(repo.head().unwrap().peel_to_commit().unwrap().committer().when())
+    }
 }
 
 #[async_std::main]

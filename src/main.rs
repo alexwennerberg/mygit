@@ -688,9 +688,12 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/log").get(repo_log);
+    app.at("/:repo_name/log/").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref is optional
     app.at("/:repo_name/tree").get(repo_tree);
+    app.at("/:repo_name/tree/").get(repo_tree);
     app.at("/:repo_name/tree/:ref").get(repo_tree); // ref is optional
+    app.at("/:repo_name/tree/:ref/").get(repo_tree); // ref is optional
     app.at("/:repo_name/tree/:ref/item/*object_name")
         .get(repo_file);
 

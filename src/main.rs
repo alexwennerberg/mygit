@@ -357,7 +357,7 @@ impl RepoCommitTemplate<'_> {
                             }
                             'B' | _ => unreachable!(),
                         }
-                        pulldown_cmark::escape::escape_html(&mut buf, content).unwrap();
+                        buf.push_str(content);
                         true
                     }
                     Err(_) => {

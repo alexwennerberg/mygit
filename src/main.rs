@@ -508,39 +508,32 @@ async fn repo_file(req: Request<()>) -> tide::Result {
 }
 
 async fn git_data(req: Request<()>) -> tide::Result {
-    match repo_from_request(req.param("repo_name")?) {
-        Ok(repo) => {
-            let path = req
-                .url()
-                .path()
-                .strip_prefix(&format!("/{}/", req.param("repo_name").unwrap()))
-                .unwrap_or_default();
-            let path = repo.path().join(path);
+    let repo = repo_from_request(req.param("repo_name")?)?;
+    let path = req
+        .url()
+        .path()
+        .strip_prefix(&format!("/{}/", req.param("repo_name").unwrap()))
+        .unwrap_or_default();
+    let path = repo.path().join(path);
 
-            if !path.starts_with(repo.path()) {
-                // that path got us outside of the repository structure somehow
-                tide::log::warn!("Attempt to acces file outside of repo dir: {:?}", path);
-                Err(tide::Error::from_str(
-                    403,
-                    "You do not have access to this file.",
-                ))
-            } else if !path.is_file() {
-                // Either the requested resource does not exist or it is not
-                // a file, i.e. a directory.
-                Err(tide::Error::from_str(404, "This page does not exist."))
-            } else {
-                // ok - inside the repo directory
-                let mut resp = tide::Response::new(200);
-                let mut body = tide::Body::from_file(path).await?;
-                body.set_mime("text/plain; charset=utf-8");
-                resp.set_body(body);
-                Ok(resp)
-            }
-        }
-        Err(_) => Err(tide::Error::from_str(
-            404,
-            "This repository does not exist.",
-        )),
+    if !path.starts_with(repo.path()) {
+        // that path got us outside of the repository structure somehow
+        tide::log::warn!("Attempt to acces file outside of repo dir: {:?}", path);
+        Err(tide::Error::from_str(
+            403,
+            "You do not have access to this file.",
+        ))
+    } else if !path.is_file() {
+        // Either the requested resource does not exist or it is not
+        // a file, i.e. a directory.
+        Err(tide::Error::from_str(404, "This page does not exist."))
+    } else {
+        // ok - inside the repo directory
+        let mut resp = tide::Response::new(200);
+        let mut body = tide::Body::from_file(path).await?;
+        body.set_mime("text/plain; charset=utf-8");
+        resp.set_body(body);
+        Ok(resp)
     }
 }
 
@@ -687,7 +680,13 @@ mod filters {
     }
 
     pub fn last_modified(repo: &Repository) -> askama::Result<git2::Time> {
-        Ok(repo.head().unwrap().peel_to_commit().unwrap().committer().when())
+        Ok(repo
+            .head()
+            .unwrap()
+            .peel_to_commit()
+            .unwrap()
+            .committer()
+            .when())
     }
 }
 

@@ -13,7 +13,7 @@ use syntect::{
     util::LinesWithEndings,
 };
 
-use tide::{Request, Response};
+use tide::{http, Body, Request, Response};
 
 mod errorpage;
 mod mail;
@@ -540,17 +540,17 @@ async fn git_data(req: Request<()>) -> tide::Result {
 
 /// Serve a file from ./templates/static/
 async fn static_resource(req: Request<()>) -> tide::Result {
-    use tide::http::conditional::{IfModifiedSince, LastModified};
+    use http::conditional::{IfModifiedSince, LastModified};
 
     // only use a File handle here because we might not need to load the file
     let file_mime_option = match req.url().path() {
         "/style.css" => Some((
             File::open("templates/static/style.css").unwrap(),
-            tide::http::mime::CSS,
+            http::mime::CSS,
         )),
         "/robots.txt" => Some((
             File::open("templates/static/robots.txt").unwrap(),
-            tide::http::mime::PLAIN,
+            http::mime::PLAIN,
         )),
         _ => None,
     };
@@ -585,7 +585,7 @@ async fn static_resource(req: Request<()>) -> tide::Result {
             let mut response = Response::new(200);
 
             match req.method() {
-                tide::http::Method::Head => {
+                http::Method::Head => {
                     /*
                     A server MAY send a Content-Length header field in a
                     response to a HEAD request; a server MUST NOT send
@@ -600,7 +600,7 @@ async fn static_resource(req: Request<()>) -> tide::Result {
                         file.metadata().unwrap().len().to_string(),
                     );
                 }
-                tide::http::Method::Get => {
+                http::Method::Get => {
                     // load the file from disk
                     let mut content = String::new();
                     file.read_to_string(&mut content).unwrap();
@@ -613,7 +613,7 @@ async fn static_resource(req: Request<()>) -> tide::Result {
             LastModified::new(last_modified).apply(&mut response);
             Ok(response)
         }
-        None if req.method() == tide::http::Method::Get => {
+        None if req.method() == http::Method::Get => {
             Err(tide::Error::from_str(404, "This page does not exist."))
         }
         // issue a 405 error since this is used as the catchall

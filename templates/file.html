@@ -2,6 +2,7 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <h3>{{tree_entry.name().unwrap()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
+  <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}/raw/{{path.display()}}" style="float:right;">raw</a>
+  <h3>{{path.display()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
   {{file_text|safe}}
 {% endblock %}

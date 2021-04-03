@@ -1,6 +1,6 @@
 use anyhow::Result;
 use askama::Template;
-use git2::{Commit, Diff, Reference, Repository, Tree, TreeEntry};
+use git2::{Commit, Diff, Reference, Repository, Tree};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs::{self, File};
@@ -433,7 +433,7 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
 #[template(path = "file.html")] // using the template in this path, relative
 struct RepoFileTemplate<'a> {
     repo: &'a Repository,
-    tree_entry: &'a TreeEntry<'a>,
+    path: &'a Path,
     file_text: &'a str,
     spec: &'a str,
 }
@@ -498,7 +498,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
 
             RepoFileTemplate {
                 repo: &repo,
-                tree_entry: &tree_entry,
+                path,
                 file_text: &output,
                 spec: &spec,
             }

@@ -439,14 +439,15 @@ struct RepoFileTemplate<'a> {
 }
 
 async fn repo_file(req: Request<()>) -> tide::Result {
-    // TODO rename for clarity
     let repo = repo_from_request(req.param("repo_name")?)?;
-    let head = repo.head()?;
-    let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
+
+    let spec = req.param("ref").unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
+
     let path = Path::new(req.param("object_name")?);
     let tree_entry = tree.get_path(path).unwrap();
+
     // TODO make sure I am escaping html properly here
     // TODO allow disabling of syntax highlighting
     // TODO -- dont pull in memory, use iterators if possible

@@ -76,7 +76,7 @@ Report bugs at https://todo.sr.ht/~aw/mygit
 
 static CONFIG: Lazy<Config> = Lazy::new(args);
 // so we only have to load this once to reduce startup time for syntax highlighting
-static SYNTAXES: Lazy<SyntaxSet> = Lazy::new(|| SyntaxSet::load_defaults_newlines());
+static SYNTAXES: Lazy<SyntaxSet> = Lazy::new(SyntaxSet::load_defaults_newlines);
 
 fn args() -> Config {
     // TODO cli
@@ -401,7 +401,7 @@ impl RepoCommitTemplate<'_> {
                             c @ ' ' | c @ '+' | c @ '-' | c @ '=' | c @ '<' | c @ '>' => {
                                 buf.push(c)
                             }
-                            'B' | _ => unreachable!(),
+                            _ => unreachable!(),
                         }
                         buf.push_str(content);
                         true

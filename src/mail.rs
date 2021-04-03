@@ -1,7 +1,6 @@
 use askama::Template;
 use tide::Request;
 
-use std::borrow::Cow;
 use std::fs;
 
 use mailparse::{parse_mail, MailHeaderMap, ParsedMail};
@@ -28,7 +27,7 @@ impl Email {
 }
 /* This function handles a lot */
 pub async fn list_threads(req: Request<()>) -> tide::Result {
-    let mut mail_files = fs::read_dir("./mail")?;
+    let mail_files = fs::read_dir("./mail")?;
     let mut result = vec![];
     for mail_file in mail_files {
         let path = mail_file?.path();

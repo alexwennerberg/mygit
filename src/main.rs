@@ -1,5 +1,5 @@
 use askama::Template;
-use git2::{Commit, Diff, Reference, Repository, Tree};
+use git2::{Commit, Diff, Reference, Repository, Signature, Tree};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs::{self, File};
@@ -294,8 +294,9 @@ async fn repo_log(req: Request<()>) -> tide::Result {
 struct RepoRefTemplate<'a> {
     repo: &'a Repository,
     branches: Vec<Reference<'a>>,
-    tags: Vec<Reference<'a>>,
+    tags: Vec<(String, Signature<'static>)>,
 }
+
 async fn repo_refs(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(&req.param("repo_name")?)?;
     if repo.is_empty().unwrap() {
@@ -310,11 +311,32 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
         .filter_map(|x| x.ok())
         .filter(|x| x.is_branch())
         .collect();
-    let tags = repo
-        .references()?
-        .filter_map(|x| x.ok())
-        .filter(|x| x.is_tag())
-        .collect();
+    let mut tags = Vec::new();
+    repo.tag_foreach(|oid, name_bytes| {
+        let obj = repo.find_object(oid, None).unwrap();
+        let signature = match obj.kind().unwrap() {
+            git2::ObjectType::Tag => obj
+                .as_tag()
+                .unwrap()
+                .tagger()
+                .unwrap_or_else(|| obj.peel_to_commit().unwrap().committer().to_owned())
+                .to_owned(),
+            git2::ObjectType::Commit => {
+                // lightweight tag
+                obj.as_commit().unwrap().committer().to_owned()
+            }
+            _ => unreachable!("a tag was not a tag or lightweight tag"),
+        };
+        tags.push((
+            // remove prefix "ref/tags/"
+            String::from_utf8(name_bytes[10..].to_vec()).unwrap(),
+            signature,
+        ));
+        true
+    })
+    .unwrap();
+    // sort so that newest tags are at the top
+    tags.sort_unstable_by(|(_, a), (_, b)| a.when().cmp(&b.when()).reverse());
     let tmpl = RepoRefTemplate {
         repo: &repo,
         branches,
@@ -762,6 +784,18 @@ mod filters {
             .unwrap()
             .committer()
             .when())
+    }
+
+    pub fn signature_email_link(signature: &Signature) -> askama::Result<String> {
+        Ok(if let Some(email) = signature.email() {
+            format!(
+                "<a href=\"mailto:{}\">{}</a>",
+                email,
+                signature.name().unwrap_or("&#65533;")
+            )
+        } else {
+            signature.to_string()
+        })
     }
 }
 

@@ -14,8 +14,18 @@
   </table>
   <h2>Tags</h2>
   <table>
-  {% for tag in tags %}
-  <tr><td class="git-reference"><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{tag.shorthand().unwrap()}}">{{ tag.shorthand().unwrap() }}</a></td></tr>
+  {% for (tag, signature) in tags %}
+    <tr>
+      <td class="git-reference">
+        <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{tag}}">{{tag}}</a>
+      </td>
+      <td>
+        {{signature|signature_email_link|safe}}
+      </td>
+      <td>
+        {{signature.when()|format_datetime("%Y-%m-%d")}}
+      </td>
+    </tr>
   {% endfor %}
   </table>
 {% endblock %}

@@ -386,7 +386,7 @@ impl RepoCommitTemplate<'_> {
                         true
                     }
                     Err(_) => {
-                        buf.push_str("Cannot display diff for binary data.");
+                        buf.push_str("Cannot display diff for binary file.");
                         false
                     }
                 },
@@ -469,33 +469,67 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .into(),
         // this is not a subtree, so it should be a blob i.e. file
         Err(tree_obj) => {
-            // get file contents from git object
-            let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
-            // create a highlighter that uses CSS classes so we can use prefers-color-scheme
-            let mut highlighter =
-                ClassedHTMLGenerator::new_with_class_style(&syntax, &SYNTAXES, ClassStyle::Spaced);
-            LinesWithEndings::from(file_string)
-                .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
+            let blob = tree_obj.as_blob().unwrap();
+            let output = if blob.is_binary() {
+                // this is not a text file, but try to serve the file if the MIME type
+                // can give a hint at how
+                let mime = http::Mime::from_extension(extension).unwrap_or_else(|| {
+                    if blob.is_binary() {
+                        http::mime::BYTE_STREAM
+                    } else {
+                        http::mime::PLAIN
+                    }
+                });
+                println!("{}", mime);
+                match mime.basetype() {
+                    "text" => unreachable!("git detected this file as binary"),
+                    "image" => format!(
+                        "<img src=\"/{}/tree/{}/raw/{}\" />",
+                        req.param("repo_name").unwrap(),
+                        spec,
+                        path.display()
+                    ),
+                    tag@"audio"|tag@"video" => format!(
+                        "<{} src=\"/{}/tree/{}/raw/{}\" controls>Your browser does not have support for playing this {0} file.</{0}>",
+                        tag,
+                        req.param("repo_name").unwrap(),
+                        spec,
+                        path.display()
+                    ),
+                    _ => "Cannot display binary file.".to_string()
+                }
+            } else {
+                // get file contents from git object
+                let file_string = str::from_utf8(tree_obj.as_blob().unwrap().content())?;
+                // create a highlighter that uses CSS classes so we can use prefers-color-scheme
+                let mut highlighter = ClassedHTMLGenerator::new_with_class_style(
+                    &syntax,
+                    &SYNTAXES,
+                    ClassStyle::Spaced,
+                );
+                LinesWithEndings::from(file_string)
+                    .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
 
-            // use oid so it is a permalink
-            let prefix = format!(
-                "/{}/tree/{}/item/{}",
-                req.param("repo_name").unwrap(),
-                commit.id(),
-                path.display()
-            );
+                // use oid so it is a permalink
+                let prefix = format!(
+                    "/{}/tree/{}/item/{}",
+                    req.param("repo_name").unwrap(),
+                    commit.id(),
+                    path.display()
+                );
 
-            let mut output = String::from("<pre>\n");
-            for (n, line) in highlighter.finalize().lines().enumerate() {
-                output.push_str(&format!(
-                    "<a href='{1}#L{0}' id='L{0}' class='line'>{0}</a>{2}\n",
-                    n + 1,
-                    prefix,
-                    line,
-                ));
-            }
-            output.push_str("</pre>\n");
-
+                let mut output = String::from("<pre>\n");
+                for (n, line) in highlighter.finalize().lines().enumerate() {
+                    output.push_str(&format!(
+                        "<a href='{1}#L{0}' id='L{0}' class='line'>{0}</a>{2}\n",
+                        n + 1,
+                        prefix,
+                        line,
+                    ));
+                }
+                output.push_str("</pre>\n");
+                output
+            };
             RepoFileTemplate {
                 repo: &repo,
                 path,

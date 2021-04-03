@@ -1,4 +1,3 @@
-use anyhow::Result;
 use askama::Template;
 use git2::{Commit, Diff, Reference, Repository, Tree};
 use once_cell::sync::Lazy;

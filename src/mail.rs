@@ -1,4 +1,3 @@
-use anyhow::Result;
 use askama::Template;
 use tide::Request;
 
@@ -21,7 +20,7 @@ struct Email {
 }
 
 impl Email {
-    fn from_parsed(mail: &ParsedMail) -> Result<Self> {
+    fn from_parsed(mail: &ParsedMail) -> tide::Result<Self> {
         Ok(Email {
             subject: mail.headers.get_first_value("Subject").unwrap(),
         })

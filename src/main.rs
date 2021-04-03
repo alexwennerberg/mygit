@@ -13,7 +13,7 @@ use syntect::{
     util::LinesWithEndings,
 };
 
-use tide::{http, Body, Request, Response};
+use tide::{http, Request, Response};
 
 mod errorpage;
 mod mail;
@@ -508,6 +508,47 @@ async fn repo_file(req: Request<()>) -> tide::Result {
     Ok(tmpl)
 }
 
+async fn repo_file_raw(req: Request<()>) -> tide::Result {
+    println!("hey");
+    let repo = repo_from_request(req.param("repo_name")?)?;
+
+    let spec = req.param("ref").unwrap();
+    let tree = repo.revparse_single(spec)?.peel_to_commit()?.tree()?;
+
+    let path = Path::new(req.param("object_name")?);
+    let blob = tree
+        .get_path(path)
+        .and_then(|tree_entry| tree_entry.to_object(&repo)?.peel_to_blob());
+    match blob {
+        Ok(blob) => {
+            let extension = path
+                .extension()
+                .and_then(std::ffi::OsStr::to_str)
+                .unwrap_or_default();
+            let mime = http::Mime::from_extension(extension).unwrap_or_else(|| {
+                if blob.is_binary() {
+                    http::mime::BYTE_STREAM
+                } else {
+                    http::mime::PLAIN
+                }
+            });
+
+            // have to put the blob's content into a Vec here because the repo will be dropped
+            Ok(Response::builder(200)
+                .body(blob.content().to_vec())
+                .content_type(mime)
+                .build())
+        }
+        Err(e) => Err(tide::Error::from_str(
+            404,
+            format!(
+                "There is no such file in this revision of the repository: {}",
+                e
+            ),
+        )),
+    }
+}
+
 async fn git_data(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(req.param("repo_name")?)?;
     let path = req
@@ -724,6 +765,8 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/tree/:ref/").get(repo_tree); // ref is optional
     app.at("/:repo_name/tree/:ref/item/*object_name")
         .get(repo_file);
+    app.at("/:repo_name/tree/:ref/raw/*object_name")
+        .get(repo_file_raw);
 
     app.at("*").all(static_resource);
     app.listen(format!("[::]:{}", CONFIG.port)).await?;

@@ -105,7 +105,8 @@ table.core {
 }
 
 /*
-color scheme: Solarized
+color scheme: SolAArized
+https://github.com/paulcpederson/solAArized
 most of these classes are used by syntect
 
 Light is the default color scheme, not using a media query for browser support.
@@ -113,101 +114,117 @@ Light is the default color scheme, not using a media query for browser support.
 /* TODO simplify, e.g. merge CSS classes. */
 
 .storage.modifier, .meta.scope.for-in-loop.shell, .variable.other.loop.shell, .meta.scope.case-block.shell, .meta.scope.case-body.shell {
-    color: #586e75; /* Solarized base01 */
+    color: #445050; /* SolAArized emphasis-light */
 }
 
-body, .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js {
-    color: #657b83; /* Solarized base00 */
+body, .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js, .punctuation.definition.string {
+    color: #4f5f5f; /* SolAArized main-light */
 }
 
 hr.thin {
-    border-top-color: #657b83; /* Solarized base00 */
-}
-
-.punctuation.definition.string {
-    color: #839496; /* Solarized base0 */
+    border-top-color: #4f5f5f; /* SolAArized main-light */
 }
 
 .comment, .meta.documentation, .punctuation.definition.tag.html, .punctuation.definition.tag.begin, .punctuation.definition.tag.end, .meta.diff, .meta.diff.header, .constant.numeric.line-number.find-in-files {
-    color: #93a1a1; /* Solarized base1 */
+    color: #617575; /* SolAArized comment-light */
 }
 
 :target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
-    background-color: #eee8d5; /* Solarized base2 */
+    background-color: #eee8d5; /* SolAArized background-highlight-light */
 }
 
 body, .code {
-    background-color: #fdf6e3; /* Solarized base3 */
+    background-color: #fdf6e3; /* SolAArized background-light */
 }
 
 .variable.function, .keyword.control.class, .entity.name, .entity.name.class, .entity.name.type.class, .entity.other.attribute-name, .entity.name.function, .constant, .constant.language, .meta.preprocessor, .support.constant.color, .invalid.deprecated.color.w3c-non-standard-color-name.scss, .entity.name.tag.css, .entity.name.tag.scss, .source.less, .keyword.control.html.elements, .source.sass, .keyword.control.untitled, .entity.other.attribute-name.class, .entity.other.attribute-name.id, .text.html.basic, .entity.other.attribute-name.html, .meta.tag.xml, .entity.other.attribute-name, .variable.other.constant.ruby, .meta.array, .support.function.construct.php, .meta.group.braces.tex, .string.other.math.tex, .string.other.math.tex, .support.type.exception.python, .markup.heading, .punctuation.definition.heading.markdown, .markup.changed.git_gutter {
-    color: #b58900; /* Solarized yellow */
+    color: #8e6c06; /* SolAArized yellow-light */
 }
 
 .meta.import, .keyword, .keyword.control.import, .keyword.control.import.from, .keyword.other.import, .keyword.control.at-rule.include, .keyword.control.at-rule.import, .entity.name.section, .constant.character, .constant.other, .support.type.exception, .keyword.other.special-method, .keyword.other.special-method.ruby, .entity.name.function.preprocessor.c, .meta.preprocessor.c.include, .meta.preprocessor.macro.c, .variable.parameter.function.latex, .support.function.section.latex {
-    color: #cb4b16; /* Solarized orange */
+    color: #c64710; /* SolAArized orange-light */
 }
 
-.constant.character.escape, .support.function.construct, .keyword.other.new, .punctuation.separator.continuation, .other.package.exclude, .other.remove, .punctuation.section.group.tex, .punctuation.definition.arguments.begin.latex, .punctuation.definition.arguments.end.latex, .punctuation.definition.arguments.latex, .punctuation.definition.constant.math.tex, .punctuation.definition.string.begin.tex, .punctuation.definition.string.end.tex, .variable.parameter.definition.label.latex, .punctuation.definition.logical-expression.shell, .markup.deleted, .markup.deleted.git_gutter, .meta.diff.header.from-file {
-    color: #dc322f; /* Solarized red */
+.constant.character.escape, .support.function.construct, .keyword.other.new, .punctuation.separator.continuation, .other.package.exclude, .other.remove, .punctuation.section.group.tex, .punctuation.definition.arguments.begin.latex, .punctuation.definition.arguments.end.latex, .punctuation.definition.arguments.latex, .punctuation.definition.constant.math.tex, .punctuation.definition.string.begin.tex, .punctuation.definition.string.end.tex, .variable.parameter.definition.label.latex, .punctuation.definition.logical-expression.shell, .markup.deleted, .markup.deleted.git_gutter, .meta.diff.header.from-file, .invalid {
+    color: #da2825; /* SolAArized red-light */
 }
 
 .variable.language {
-    color: #d33682; /* Solarized magenta */
+    color: #c9367d; /* SolAArized magenta-light */
 }
 
 .constant.numeric, .constant.other.reference.link.markdown {
-    color: #6c71c4; /* Solarized violet */
+    color: #6266cb; /* SolAArized violet-light */
 }
 
 a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .meta.brace.square, .punctuation.section.brackets, .entity.other.attribute-name.pseudo-element, .entity.other.attribute-name.tag.pseudo-element, .entity.other.attribute-name.pseudo-class, .entity.other.attribute-name.tag.pseudo-class, .support.function.perl, .meta.diff.range {
-    color: #268bd2; /* Solarized blue */
+    color: #2976ae; /* SolAArized blue-light */
 }
 
 .string, .string.regexp, .string.quoted.double, .string.quoted.single, .constant.other.symbol.ruby, .meta.preprocessor.c.include, .string.quoted.other.lt-gt.include.c, .meta.preprocessor.c.include, .punctuation.definition.string.begin.c, .meta.preprocessor.c.include, .punctuation.definition.string.end.c, .other.add, .text.tex.latex, .constant.other.math.tex, .constant.other.general.math.tex, .constant.other.general.math.tex, .constant.character.math.tex, .keyword.control.label.latex, .text.tex.latex, .constant.other.general.math.tex, .support.function.general.tex, .keyword.control.ref.latex, .markup.changed, .markup.underline.link.markdown, .meta.link.reference, .constant.other.reference.link.markdown, .entity.name.filename.find-in-files {
-    color: #2aa198; /* Solarized cyan */
+    color: #207e77; /* SolAArized cyan-light */
 }
 
 .keyword, .storage, .support, .support.type, .support.class, .punctuation.definition.variable, .support.function, .keyword.other.special-method.ruby, .support.function.be.latex, .storage.type.class.python, .storage.type.function.python, .storage.modifier.global.python, .storage.modifier.cpp, .markup.inserted, .markup.quote, .markup.inserted.git_gutter, .meta.diff.header.to-file {
-    color: #859900; /* Solarized green */
-}
-
-.invalid {
-    background-color: #ec9489;
+    color: #697807; /* SolAArized green-light */
 }
 
 /* Dark colour scheme for browsers that support it. */
 
 @media (prefers-color-scheme: dark) {
     .storage.modifier, .meta.scope.for-in-loop.shell, .variable.other.loop.shell, .meta.scope.case-block.shell, .meta.scope.case-body.shell {
-        color: #93a1a1; /* Solarized base1 */
+        color: #a1acaf; /* SolAArized emphasis-dark */
     }
 
-    body, .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js {
-        color: #839496; /* Solarized base0 */
+    body, .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js, .punctuation.definition.string {
+        color: #919ea1; /* SolAArized main-dark */
     }
 
     hr.thin {
-        border-top-color: #839496; /* Solarized base0 */
-    }
-
-    .punctuation.definition.string {
-        color: #657b83; /* Solarized base00 */
+        border-top-color: #919ea1; /* SolAArized main-dark */
     }
 
     .comment, .meta.documentation, .punctuation.definition.tag.html, .punctuation.definition.tag.begin, .punctuation.definition.tag.end, .meta.diff, .meta.diff.header, .constant.numeric.line-number.find-in-files {
-        color: #586e75; /* Solarized base01 */
+        color: #79929a; /* SolAArized comment-dark */
     }
 
     :target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
-        background-color: #073642; /* Solarized base02 */
+        background-color: #003a44; /* SolAArized background-highdark-dark */
     }
 
     body, .code {
-        background-color: #002b36; /* Solarized base03 */
+        background-color: #002b36; /* SolAArized background-dark */
     }
 
-    .invalid {
-        background-color: #6e2e32;
+    .variable.function, .keyword.control.class, .entity.name, .entity.name.class, .entity.name.type.class, .entity.other.attribute-name, .entity.name.function, .constant, .constant.language, .meta.preprocessor, .support.constant.color, .invalid.deprecated.color.w3c-non-standard-color-name.scss, .entity.name.tag.css, .entity.name.tag.scss, .source.less, .keyword.control.html.elements, .source.sass, .keyword.control.untitled, .entity.other.attribute-name.class, .entity.other.attribute-name.id, .text.html.basic, .entity.other.attribute-name.html, .meta.tag.xml, .entity.other.attribute-name, .variable.other.constant.ruby, .meta.array, .support.function.construct.php, .meta.group.braces.tex, .string.other.math.tex, .string.other.math.tex, .support.type.exception.python, .markup.heading, .punctuation.definition.heading.markdown, .markup.changed.git_gutter {
+        color: #b58900; /* SolAArized yellow-dark */
+    }
+
+    .meta.import, .keyword, .keyword.control.import, .keyword.control.import.from, .keyword.other.import, .keyword.control.at-rule.include, .keyword.control.at-rule.import, .entity.name.section, .constant.character, .constant.other, .support.type.exception, .keyword.other.special-method, .keyword.other.special-method.ruby, .entity.name.function.preprocessor.c, .meta.preprocessor.c.include, .meta.preprocessor.macro.c, .variable.parameter.function.latex, .support.function.section.latex {
+        color: #cb4b16; /* SolAArized orange-dark */
+    }
+
+    .constant.character.escape, .support.function.construct, .keyword.other.new, .punctuation.separator.continuation, .other.package.exclude, .other.remove, .punctuation.section.group.tex, .punctuation.definition.arguments.begin.latex, .punctuation.definition.arguments.end.latex, .punctuation.definition.arguments.latex, .punctuation.definition.constant.math.tex, .punctuation.definition.string.begin.tex, .punctuation.definition.string.end.tex, .variable.parameter.definition.label.latex, .punctuation.definition.logical-expression.shell, .markup.deleted, .markup.deleted.git_gutter, .meta.diff.header.from-file, .invalid {
+        color: #dc322f; /* SolAArized red-dark */
+    }
+
+    .variable.language {
+        color: #d33682; /* SolAArized magenta-dark */
+    }
+
+    .constant.numeric, .constant.other.reference.link.markdown {
+        color: #6c71c4; /* SolAArized violet-dark */
+    }
+
+    a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .meta.brace.square, .punctuation.section.brackets, .entity.other.attribute-name.pseudo-element, .entity.other.attribute-name.tag.pseudo-element, .entity.other.attribute-name.pseudo-class, .entity.other.attribute-name.tag.pseudo-class, .support.function.perl, .meta.diff.range {
+        color: #268bd2; /* SolAArized blue-dark */
+    }
+
+    .string, .string.regexp, .string.quoted.double, .string.quoted.single, .constant.other.symbol.ruby, .meta.preprocessor.c.include, .string.quoted.other.lt-gt.include.c, .meta.preprocessor.c.include, .punctuation.definition.string.begin.c, .meta.preprocessor.c.include, .punctuation.definition.string.end.c, .other.add, .text.tex.latex, .constant.other.math.tex, .constant.other.general.math.tex, .constant.other.general.math.tex, .constant.character.math.tex, .keyword.control.label.latex, .text.tex.latex, .constant.other.general.math.tex, .support.function.general.tex, .keyword.control.ref.latex, .markup.changed, .markup.underline.link.markdown, .meta.link.reference, .constant.other.reference.link.markdown, .entity.name.filename.find-in-files {
+        color: #2aa198; /* SolAArized cyan-dark */
+    }
+
+    .keyword, .storage, .support, .support.type, .support.class, .punctuation.definition.variable, .support.function, .keyword.other.special-method.ruby, .support.function.be.latex, .storage.type.class.python, .storage.type.function.python, .storage.modifier.global.python, .storage.modifier.cpp, .markup.inserted, .markup.quote, .markup.inserted.git_gutter, .meta.diff.header.to-file {
+        color: #859900; /* SolAArized green-dark */
     }
 }

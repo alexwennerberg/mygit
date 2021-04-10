@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>{{repo|repo_name}} {{branch}} commits</title>
+    <link>{{base_url}}/log</link>
+    <description>
+      Not more than the last 100 commits to the branch {{branch}} of the repository {{repo|repo_name}}:
+      &lt;p&gt;{{repo|description}}&lt;/p&gt;
+    </description>
+    <ttl>30</ttl>
+    <generator>mygit</generator>
+    <lastBuildDate>{{repo|last_modified|format_datetime("%a, %e %b %Y %T %z")}}</lastBuildDate>
+    <managingEditor>{{repo|repo_owner}}</managingEditor>
+    <docs>https://www.rssboard.org/rss-specification</docs>
+    {% for commit in commits %}
+      <item>
+        <title>{{commit.summary().unwrap_or("")}}</title>
+        <link>{{base_url}}/commit/{{commit.id()}}</link>
+        <description>&lt;pre&gt;{{commit.message().unwrap_or("")}}&lt;/pre&gt;</description>
+        <author>{{commit.author().email().unwrap_or("")}}</author>
+        <pubDate>{{commit.time()|format_datetime("%a, %e %b %Y %T %z")}}</pubDate>
+      </item>
+    {% endfor %}
+  </channel>
+</rss>

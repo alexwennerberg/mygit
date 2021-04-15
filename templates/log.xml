@@ -16,6 +16,7 @@
       <item>
         <title>{{commit.summary().unwrap_or("")}}</title>
         <link>{{base_url}}/commit/{{commit.id()}}</link>
+        <guid isPermaLink="true">{{base_url}}/commit/{{commit.id()}}</guid>
         <description>&lt;pre&gt;{{commit.message().unwrap_or("")}}&lt;/pre&gt;</description>
         <author>{{commit.author().email().unwrap_or("")}}</author>
         <pubDate>{{commit.time()|format_datetime("%a, %e %b %Y %T %z")}}</pubDate>

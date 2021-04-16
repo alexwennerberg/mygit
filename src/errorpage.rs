@@ -46,6 +46,7 @@ impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpag
             }
         }
 
+        response.insert_header("Permissions-Policy", "interest-cohort=()");
         Ok(response)
     }
 }

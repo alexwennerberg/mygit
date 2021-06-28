@@ -8,10 +8,10 @@
   <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent_id}}" class="commit-hash">{{parent_id}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent_id}}">tree</a>)
   <br>
   {% endfor %}
-  <b>Author:</b> {{commit.author().name().unwrap()}} &lt;<a href="mailto:{{commit.author().email().unwrap()}}">{{commit.author().email().unwrap()}}</a>&gt;
+  <b>Author:</b> {{commit.author()|signature_email_link|safe}}
   <br>
   {% if commit.author().name() != commit.committer().name() || commit.author().email() != commit.committer().email() %}
-  <b>Committer:</b> {{commit.committer().name().unwrap()}} &lt;<a href="mailto:{{commit.committer().email().unwrap()}}">{{commit.committer().email().unwrap()}}</a>&gt;
+  <b>Committer:</b> {{commit.committer()|signature_email_link|safe}}
   <br>
   {% endif %}
   <b>Date:</b> {{commit.time()|format_datetime("%c %z")}}

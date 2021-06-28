@@ -14,6 +14,7 @@
   <br>
   {% let stats = diff.stats().unwrap() %}
   {{stats.files_changed()}} files changed; {{stats.insertions()}} insertions {{stats.deletions()}} deletions
+  <hr class="thin"/>
   <pre class="commit-message">{{commit.message().unwrap()}}</pre>
   <hr class="thin"/>
   <pre id="diff">{{self.diff()|safe}}</pre>

@@ -12,11 +12,11 @@
     <lastBuildDate>{{repo|last_modified|format_datetime("%a, %e %b %Y %T %z")}}</lastBuildDate>
     <managingEditor>{{repo|repo_owner}}</managingEditor>
     <docs>https://www.rssboard.org/rss-specification</docs>
-    {% for (tag, signature, message) in tags %}
+    {% for (link, tag, signature, message) in tags %}
       <item>
         <title>{{tag}}</title>
-        <link>{{base_url}}/commit/{{tag}}</link>
-        <guid isPermaLink="true">{{base_url}}/commit/{{tag}}</guid>
+        <link>{{base_url}}/{{link}}</link>
+        <guid isPermaLink="true">{{base_url}}/{{link}}</guid>
         <description>&lt;pre&gt;{{message}}&lt;/pre&gt;</description>
         <author>{{signature.email().unwrap_or("")}}</author>
         <pubDate>{{signature.when()|format_datetime("%a, %e %b %Y %T %z")}}</pubDate>

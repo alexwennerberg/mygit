@@ -137,8 +137,9 @@ async fn index(_req: Request<()>) -> tide::Result {
 
 #[derive(Template)]
 #[template(path = "repo.html")] // using the template in this path, relative
-struct RepoHomeTemplate {
-    repo: Repository,
+struct RepoHomeTemplate<'a> {
+    repo: &'a Repository,
+    commits: Vec<Commit<'a>>,
     readme_text: String,
 }
 
@@ -218,7 +219,28 @@ async fn repo_home(req: Request<()>) -> tide::Result {
         })
         .unwrap_or_default();
 
-    Ok(RepoHomeTemplate { repo, readme_text }.into())
+    // get the first few commits for a preview
+    let commits = if repo.is_shallow() {
+        tide::log::warn!("repository {:?} is only a shallow clone", repo.path());
+        vec![repo.head()?.peel_to_commit().unwrap()]
+    } else {
+        let mut revwalk = repo.revwalk()?;
+        let r = req.param("ref").unwrap_or("HEAD");
+        revwalk.push(repo.revparse_single(r)?.peel_to_commit()?.id())?;
+
+        revwalk.set_sorting(git2::Sort::TIME).unwrap();
+        revwalk
+            .filter_map(|oid| repo.find_commit(oid.unwrap()).ok()) // TODO error handling
+            .take(3)
+            .collect()
+    };
+
+    Ok(RepoHomeTemplate {
+        repo: &repo,
+        commits,
+        readme_text,
+    }
+    .into())
 }
 
 #[derive(Template)]

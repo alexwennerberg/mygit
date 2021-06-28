@@ -2,6 +2,21 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
+  <table>
+  {% for commit in commits %}
+  <tr>
+    <td><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{commit.id()}}" class="commit-hash">{{commit.id().to_string()[..7]}}</a></td>
+    {% let summary = commit.summary().unwrap_or("")|truncate(72) %}
+    <td class="commit-summary">{{summary}}</td>
+    <td class="commit-author-email">{{commit.author()|signature_email_link|safe}}</td>
+    <td class="commit-date">{{commit.time()|format_datetime("%Y-%m-%d")}}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <td colspan="4"><a href="/{{repo|repo_name|urlencode_strict}}/log/">...</a></td>
+  </tr>
+  </table>
+  <hr class="thin"/>
   <div class="readme">
   {% if !readme_text.is_empty() -%}
     {{ readme_text|safe }}

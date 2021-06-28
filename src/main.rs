@@ -783,10 +783,10 @@ async fn repo_log_feed(req: Request<()>) -> tide::Result {
     let mut url = req.url().clone();
     {
         let mut segments = url.path_segments_mut().unwrap();
-        segments.pop(); // pop "feed.xml"
-        segments.pop(); // pop "log/" or ref
+        segments.pop(); // pop "log.xml" or "feed.xml"
         if req.param("ref").is_ok() {
-            segments.pop(); // the last pop was a ref, now pop "log/"
+            segments.pop(); // pop ref
+            segments.pop(); // pop "log/"
         }
     }
 
@@ -856,10 +856,10 @@ async fn repo_refs_feed(req: Request<()>) -> tide::Result {
     let mut url = req.url().clone();
     {
         let mut segments = url.path_segments_mut().unwrap();
-        segments.pop(); // pop "feed.xml"
-        segments.pop(); // pop "log/" or ref
+        segments.pop(); // pop "log.xml" or "feed.xml"
         if req.param("ref").is_ok() {
-            segments.pop(); // the last pop was a ref, now pop "log/"
+            segments.pop(); // pop ref
+            segments.pop(); // pop "log/"
         }
     }
 
@@ -986,11 +986,11 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/commit/:commit").get(repo_commit);
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/refs/").get(repo_refs);
-    app.at("/:repo_name/refs/feed.xml").get(repo_refs_feed);
+    app.at("/:repo_name/refs.xml").get(repo_refs_feed);
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref is optional
-    app.at("/:repo_name/log/feed.xml").get(repo_log_feed);
+    app.at("/:repo_name/log.xml").get(repo_log_feed);
     app.at("/:repo_name/log/:ref/feed.xml").get(repo_log_feed); // ref is optional
     app.at("/:repo_name/tree").get(repo_tree);
     app.at("/:repo_name/tree/").get(repo_tree);

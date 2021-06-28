@@ -1,5 +1,5 @@
 use askama::Template;
-use git2::{Commit, Diff, Reference, Repository, Signature, Tree};
+use git2::{Commit, Diff, Reference, Repository, Signature, Tag, Tree};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs::{self, File};
@@ -469,6 +469,21 @@ async fn repo_commit(req: Request<()>) -> tide::Result {
         commit,
         diff: &diff,
     };
+    Ok(tmpl.into())
+}
+
+#[derive(Template)]
+#[template(path = "tag.html")]
+struct RepoTagTemplate<'a> {
+    repo: &'a Repository,
+    tag: Tag<'a>,
+}
+
+async fn repo_tag(req: Request<()>) -> tide::Result {
+    let repo = repo_from_request(req.param("repo_name")?)?;
+    let tag = repo.revparse_single(req.param("tag")?)?.peel_to_tag()?;
+
+    let tmpl = RepoTagTemplate { repo: &repo, tag };
     Ok(tmpl.into())
 }
 
@@ -987,6 +1002,7 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/refs").get(repo_refs);
     app.at("/:repo_name/refs/").get(repo_refs);
     app.at("/:repo_name/refs.xml").get(repo_refs_feed);
+    app.at("/:repo_name/refs/:tag").get(repo_tag);
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref is optional

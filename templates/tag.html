@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% include "repo-navbar.html" %}
+  <b>Commit:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{tag.target_id()}}" class="commit-hash">{{tag.target_id()}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{tag.name().unwrap_or("")}}">tree</a>)
+  <br>
+  {% if tag.tagger().is_some() %}
+  <b>Tagged by:</b> {{tag.tagger().unwrap()|signature_email_link|safe}}
+  <br>
+  <b>Date:</b> {{tag.tagger().unwrap().when()|format_datetime("%c %z")}}
+  <br>
+  {% endif %}
+  <hr class="thin"/>
+  <pre class="commit-message">{{tag.message().unwrap()}}</pre>
+{% endblock %}

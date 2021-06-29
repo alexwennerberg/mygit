@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{repo|repo_name}} refs - {{crate::CONFIG.site_name}}{% endblock %}
+
 {% block content %}
   {% include "repo-navbar.html" %}
   <h2>Branches</h2>

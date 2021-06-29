@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{repo|repo_name}} tag {{tag.name().unwrap()}} - {{crate::CONFIG.site_name}}{% endblock %}
+
 {% block content %}
   {% include "repo-navbar.html" %}
   <b>Commit:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{tag.target_id()}}" class="commit-hash">{{tag.target_id()}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{tag.name().unwrap_or("")}}">tree</a>)

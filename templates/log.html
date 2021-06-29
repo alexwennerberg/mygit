@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{repo|repo_name}} log at {{branch}} - {{crate::CONFIG.site_name}}{% endblock %}
+
 {% block content %}
   {% include "repo-navbar.html" %}
   {% if next_page.is_some() %}

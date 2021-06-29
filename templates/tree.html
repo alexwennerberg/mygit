@@ -14,16 +14,24 @@
       <td class="permissions">
         {{ entry.filemode()|unix_perms }}
       </td>
+      {% let obj = entry.to_object(repo) %}
+      {% if obj.is_ok() %}
+      {% let o = obj.unwrap() %}
       <td class="filename">
         <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{ spec }}/item/{{path.join(entry.name().unwrap()).to_string_lossy()}}">
-        {{ entry.name().unwrap() }}{% if entry.to_object(repo).unwrap().as_tree().is_some() %}/{% endif %}</a>
+        {{ entry.name().unwrap() }}{% if o.as_tree().is_some() %}/{% endif %}</a>
       </td>
       <td class="filesize">
-        {% let obj = entry.to_object(repo).unwrap() %}
-        {% if obj.as_blob().is_some() %}
-        {{ entry.to_object(repo).unwrap().into_blob().unwrap().content().len()|filesizeformat }}
+        {% if o.as_blob().is_some() %}
+        {{ o.into_blob().unwrap().content().len()|filesizeformat }}
         {% endif %}
       </td>
+      {% else %}
+      <td class="filename">
+        {{ entry.name().unwrap() }}
+      </td>
+      <td class="filesize"></td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>

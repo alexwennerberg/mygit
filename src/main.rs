@@ -903,32 +903,19 @@ mod filters {
     }
 
     pub fn unix_perms(m: &i32) -> ::askama::Result<String> {
-        let mut m = *m;
-        // manually wrote this bc I couldn't find a library
-        // acting like I'm writing C for fun
-        // TODO -- symlinks?
         // https://unix.stackexchange.com/questions/450480/file-permission-with-six-bytes-in-git-what-does-it-mean
-        if m == 0o040000 {
-            // is directory
-            return Ok("d---------".to_owned());
+        // Git doesn’t store arbitrary modes, only a subset of the values are
+        // allowed. Since the number of possible values is quite small, it is
+        // easiest to exhaustively match them.
+        Ok(match m {
+            0o040000 => "drwxr-xr-x", // directory
+            0o100755 => "-rwxr-xr-x", // regular file, executable
+            0o100644 => "-rw-r--r--", // regular file, default umask
+            0o120000 => "lrwxrwxrwx", // symlink
+            0o160000 => "m---------", // submodule
+            _ => unreachable!("unknown file mode"),
         }
-        let mut output: [u8; 10] = [0; 10]; // ascii string
-        let mut i = 9;
-        for _ in 0..3 {
-            // Go backwards here
-            for c in &[0x78, 0x77, 0x72] {
-                // xrw
-                if m % 2 == 1 {
-                    output[i] = *c;
-                } else {
-                    output[i] = 0x2d; // -
-                }
-                m >>= 1;
-                i -= 1;
-            }
-        }
-        output[i] = 0x2d; // -
-        return Ok(std::str::from_utf8(&output).unwrap().to_owned());
+        .into())
     }
 
     pub fn repo_name(repo: &Repository) -> askama::Result<&str> {

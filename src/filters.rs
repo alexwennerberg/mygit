@@ -1,13 +1,14 @@
-use super::*;
+use git2::{Commit, Repository, Signature, Time};
 
-pub fn format_datetime(time: &git2::Time, format: &str) -> ::askama::Result<String> {
+pub fn format_datetime(time: &Time, format: &str) -> askama::Result<String> {
     use chrono::{FixedOffset, TimeZone};
+
     let offset = FixedOffset::west(time.offset_minutes() * 60);
     let datetime = offset.timestamp(time.seconds(), 0);
     Ok(datetime.format(format).to_string())
 }
 
-pub fn unix_perms(m: &i32) -> ::askama::Result<String> {
+pub fn unix_perms(m: &i32) -> askama::Result<String> {
     // https://unix.stackexchange.com/questions/450480/file-permission-with-six-bytes-in-git-what-does-it-mean
     // Git doesn’t store arbitrary modes, only a subset of the values are
     // allowed. Since the number of possible values is quite small, it is
@@ -34,7 +35,7 @@ pub fn repo_name(repo: &Repository) -> askama::Result<&str> {
 }
 
 pub fn description(repo: &Repository) -> askama::Result<String> {
-    Ok(fs::read_to_string(repo.path().join("description"))
+    Ok(std::fs::read_to_string(repo.path().join("description"))
         .unwrap_or_default()
         // only use first line
         .lines()
@@ -73,6 +74,12 @@ pub fn signature_email_link(signature: &Signature) -> askama::Result<String> {
     })
 }
 
-pub fn short_id(commit: &git2::Commit) -> askama::Result<String> {
-    Ok(commit.as_object().short_id().unwrap().as_str().unwrap().to_string())
+pub fn short_id(commit: &Commit) -> askama::Result<String> {
+    Ok(commit
+        .as_object()
+        .short_id()
+        .unwrap()
+        .as_str()
+        .unwrap()
+        .to_string())
 }

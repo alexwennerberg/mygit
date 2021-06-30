@@ -1,4 +1,3 @@
-
 use super::*;
 
 pub fn format_datetime(time: &git2::Time, format: &str) -> ::askama::Result<String> {

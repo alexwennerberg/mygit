@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{repo|repo_name}} commit {{commit.id()}} - {{crate::CONFIG.site_name}}{% endblock %}
+{% block title %}{{repo|repo_name}} commit {{commit|short_id}} - {{crate::CONFIG.site_name}}{% endblock %}
 
 {% block content %}
   {% include "repo-navbar.html" %}

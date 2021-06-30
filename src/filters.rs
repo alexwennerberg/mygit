@@ -72,3 +72,7 @@ pub fn signature_email_link(signature: &Signature) -> askama::Result<String> {
         signature.to_string()
     })
 }
+
+pub fn short_id(commit: &git2::Commit) -> askama::Result<String> {
+    Ok(commit.as_object().short_id().unwrap().as_str().unwrap().to_string())
+}

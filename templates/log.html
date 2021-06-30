@@ -11,7 +11,7 @@
   <table>
   {% for commit in commits %} 
   <tr>
-    <td><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{commit.id()}}" class="commit-hash">{{commit.id().to_string()[..7]}}</a></td>
+    <td><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{commit.id()}}" class="commit-hash">{{commit|short_id}}</a></td>
     {% let summary = commit.summary().unwrap_or("")|truncate(72) %}
     <td class="commit-summary">{{summary}}</td>
     <td class="commit-author-email">{{commit.author()|signature_email_link|safe}}</td>

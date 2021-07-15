@@ -487,10 +487,19 @@ struct RepoTagTemplate<'a> {
 
 async fn repo_tag(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(req.param("repo_name")?)?;
-    let tag = repo.revparse_single(req.param("tag")?)?.peel_to_tag()?;
+    let tag = repo.revparse_single(req.param("tag")?)?.peel_to_tag();
 
-    let tmpl = RepoTagTemplate { repo: &repo, tag };
-    Ok(tmpl.into())
+    if let Ok(tag) = tag {
+        let tmpl = RepoTagTemplate { repo: &repo, tag };
+        Ok(tmpl.into())
+    } else {
+        Ok(tide::Redirect::permanent(format!(
+            "/{}/commit/{}",
+            req.param("repo_name")?,
+            req.param("tag")?
+        ))
+        .into())
+    }
 }
 
 #[derive(Template)]

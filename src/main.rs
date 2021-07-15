@@ -116,7 +116,33 @@ struct IndexTemplate {
     repos: Vec<Repository>,
 }
 
-async fn index(_req: Request<()>) -> tide::Result {
+async fn index(req: Request<()>) -> tide::Result {
+    // check for gitweb parameters to redirect
+    if let Some(query) = req.url().query() {
+        // gitweb does not use standard & separated query parameters
+        let query = query
+            .split(";")
+            .map(|s| {
+                println!("{}", s);
+                let mut parts = s.splitn(2, "=");
+                (parts.next().unwrap(), parts.next().unwrap())
+            })
+            .collect::<std::collections::HashMap<_, _>>();
+        if let Some(repo) = query.get("p") {
+            return Ok(tide::Redirect::permanent(match query.get("a") {
+                None | Some(&"summary") => format!("/{}/", repo),
+                Some(&"commit") | Some(&"commitdiff") => {
+                    format!("/{}/commit/{}", repo, query.get("h").cloned().unwrap_or(""))
+                }
+                Some(&"shortlog") | Some(&"log") => {
+                    format!("/{}/log/{}", repo, query.get("h").cloned().unwrap_or(""))
+                }
+                Some(_) => format!("/"),
+            })
+            .into());
+        }
+    }
+
     let repos = fs::read_dir(&CONFIG.projectroot)
         .map(|entries| {
             entries

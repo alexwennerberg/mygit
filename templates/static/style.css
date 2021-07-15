@@ -84,6 +84,10 @@ table.core {
     border-collapse: collapse;
 }
 
+.badge {
+	padding: .2em;
+}
+
 @media only screen and (max-width: 600px) {
     body {
         font-size: 16px;
@@ -169,6 +173,15 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
     color: #697807; /* SolAArized green-light */
 }
 
+.badge {
+    color: #fdf6e3; /* SolAArized background-light */
+    background-color: #697807; /* SolAArized green-light */
+}
+
+.badge.tag {
+    background-color: #c64710; /* SolAArized orange-light */
+}
+
 /* Dark colour scheme for browsers that support it. */
 
 @media (prefers-color-scheme: dark) {
@@ -226,5 +239,14 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
 
     .keyword, .storage, .support, .support.type, .support.class, .punctuation.definition.variable, .support.function, .keyword.other.special-method.ruby, .support.function.be.latex, .storage.type.class.python, .storage.type.function.python, .storage.modifier.global.python, .storage.modifier.cpp, .markup.inserted, .markup.quote, .markup.inserted.git_gutter, .meta.diff.header.to-file {
         color: #859900; /* SolAArized green-dark */
+    }
+
+    .badge {
+        color: #002b36; /* SolAArized background-dark */
+        background-color: #859900; /* SolAArized green-dark */
+    }
+
+    .badge.tag {
+        background-color: #b58900; /* SolAArized orange-dark */
     }
 }

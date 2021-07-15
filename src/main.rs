@@ -452,6 +452,47 @@ impl RepoCommitTemplate<'_> {
             .for_each(|line| highlighter.parse_html_for_line_which_includes_newline(line));
         highlighter.finalize()
     }
+
+    fn refs(&self) -> String {
+        use git2::{BranchType, DescribeFormatOptions, DescribeOptions};
+
+        let mut html = String::new();
+
+        // add badge if this commit is a tag
+        let descr = self.commit.as_object().describe(
+            &DescribeOptions::new()
+                .describe_tags()
+                .max_candidates_tags(0),
+        );
+        if let Ok(descr) = descr {
+            // this can be a tag or lightweight tag, the refs path will redirect
+            html += &format!(
+                r#"<a href="/{0}/refs/{1}" class="badge tag">{1}</a>"#,
+                filters::repo_name(self.repo).unwrap(),
+                descr
+                    .format(Some(DescribeFormatOptions::new().abbreviated_size(0)))
+                    .unwrap(),
+            );
+        }
+
+        // also add badge if this is the tip of a branch
+        let branches = self
+            .repo
+            .branches(Some(BranchType::Local))
+            .unwrap()
+            .filter_map(|x| if let Ok(x) = x { Some(x.0) } else { None })
+            .filter(|branch| branch.get().peel_to_commit().unwrap().id() == self.commit.id());
+        for branch in branches {
+            // branch is not a reference, just a fancy name for a commit
+            html += &format!(
+                r#" <a href="/{0}/commit/{1}" class="badge branch">{1}</a>"#,
+                filters::repo_name(self.repo).unwrap(),
+                branch.name().unwrap().unwrap(),
+            );
+        }
+
+        html
+    }
 }
 
 async fn repo_commit(req: Request<()>) -> tide::Result {

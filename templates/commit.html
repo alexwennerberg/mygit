@@ -5,6 +5,7 @@
 {% block content %}
   {% include "repo-navbar.html" %}
   <b>Commit:</b> <span class="commit-hash">{{commit.id()}}</span> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{commit.id()}}">tree</a>)
+  {{self.refs()|safe}}
   <br>
   {% for parent_id in self.parent_ids() %}
   <b>Parent:</b> <a href="/{{repo|repo_name|urlencode_strict}}/commit/{{parent_id}}" class="commit-hash">{{parent_id}}</a> (<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{parent_id}}">tree</a>)

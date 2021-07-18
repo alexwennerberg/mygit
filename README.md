@@ -41,8 +41,6 @@ The simplest way to accept patches when self-hosting Git is through [git-send-em
 
 I am working on a sibling project to this that handles mailing list archives for exactly this purpose, but it is not ready for the public yet.
 
-## Why self-host git?
-
 ## Contributing
 * [ticket tracker](https://todo.sr.ht/~aw/mygit)
 * [patches](https://lists.sr.ht/~aw/patches)

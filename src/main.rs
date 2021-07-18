@@ -1,5 +1,5 @@
 use askama::Template;
-use git2::{Commit, Diff, Reference, Repository, Signature, Tag, Tree};
+use git2::{Commit, Diff, DiffOptions, Reference, Repository, Signature, Tag, Tree};
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::fs::{self, File};
@@ -308,11 +308,29 @@ async fn repo_log(req: Request<()>) -> tide::Result {
         }
 
         revwalk.set_sorting(git2::Sort::TIME).unwrap();
-        revwalk
-            .filter_map(|oid| repo.find_commit(oid.unwrap()).ok()) // TODO error handling
-            .take(CONFIG.log_per_page + 1)
-            .collect()
+        let commits = revwalk.filter_map(|oid| repo.find_commit(oid.unwrap()).ok()); // TODO error handling
+
+        // filter for specific file if necessary
+        if let Ok(path) = req.param("object_name") {
+            let mut options = DiffOptions::new();
+            options.pathspec(path);
+            commits
+                .filter(|commit|
+                // check that the given file was affected from any of the parents
+                commit.parents().any(|parent|
+                    repo.diff_tree_to_tree(
+                        Some(&commit.tree().unwrap()),
+                        Some(&parent.tree().unwrap()),
+                        Some(&mut options),
+                    ).unwrap().stats().unwrap().files_changed()>0
+                ))
+                .take(CONFIG.log_per_page + 1)
+                .collect()
+        } else {
+            commits.take(CONFIG.log_per_page + 1).collect()
+        }
     };
+
     // check if there even is a next page
     let next_page = if commits.len() < CONFIG.log_per_page + 1 {
         None
@@ -996,6 +1014,8 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/log").get(repo_log);
     app.at("/:repo_name/log/").get(repo_log);
     app.at("/:repo_name/log/:ref").get(repo_log); // ref is optional
+    app.at("/:repo_name/log/:ref/").get(repo_log); // ref is optional
+    app.at("/:repo_name/log/:ref/*object_name").get(repo_log);
     app.at("/:repo_name/log.xml").get(repo_log_feed);
     app.at("/:repo_name/log/:ref/feed.xml").get(repo_log_feed); // ref is optional
     app.at("/:repo_name/tree").get(repo_tree);

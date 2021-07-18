@@ -1,7 +1,7 @@
 # mygit
-A small self-hosted git project hub
+Small self-hosted git, written in Rust
 
-Making self-hosting email-based git workflows simple and easy (WIP -- no email support yet, git support incomplete)
+More lightweight than something like [gitea](https://gitea.io/en-us/), more modern than something like [cgit](https://git.zx2c4.com/cgit/) or [gitweb](https://git-scm.com/book/en/v2/Git-on-the-Server-GitWeb)
 
 Live demo at https://git.alexwennerberg.com
 
@@ -38,14 +38,10 @@ You'll want to modify these commands to push to your mygit server and somewhere 
 ## Background
 Many people want to self-host Git in order to get rid of their reliance on GitHub or other institutions. However, the options for doing this are problematic in a number of ways. There are ancient CGI programs written in C or Perl like gitolite, cgit and webgit, and there are modern programs like gitea or gitlab that are essentially GitHub clones, with a lot of unnecessary complexity for many people's use cases.
 
-I really like [stagit](https://codemadness.org/stagit.html), but it's a bit too austere for my use case and very "suckless" philosophy: e.g. doesn't support markdown READMEs. I also really like [sourcehut](https://git.sr.ht/) but it is pretty complex to self-host a single-user instance. 
-
-The simplest way to accept patches when hosting a Git repo in this manner is through [git-send-email](https://git-scm.com/docs/git-send-email). You can accept patches either to your personal email or use a mailing list. This is a somewhat archaic way of doing things, and definitely has some disadvantages, but it is the simplest way to accept patches when self-hosting Git. A single-user [Gitea](https://gitea.io/en-us/) instance, for example, requires that users register and you manage their user accounts. With git-send-email, users can contribute to your project without having to create another account. This may not be the easiest or most accessible way to handle your project (unquestionably, that would be just using GitHub) but IMO it's the best way to do things if you want a simple self-hosted solution. Unfortunately, not many people are familiar with git-send-email anymore (and self-hosting dramatically hurts your project discovery), so probably it only makes sense to do this if you're an ideological purist of some sort, or just want to try self-hosting some small, low-stakes projects for fun.
+The simplest way to accept patches when self-hosting Git is through [git-send-email](https://git-scm.com/docs/git-send-email). You can accept patches either to your personal email or use a mailing list. 
 
 I am working on a sibling project to this that handles mailing list archives for exactly this purpose:
-https://git.sr.ht/~aw/rusty-inbox
-
-I'm still deciding if I want that project merged into this one. I am considering it to simplify deployment and provide an all-in-one easy to deploy solution
+https://github.com/alexwennerberg/crabmail
 
 ## Contributing
 * [ticket tracker](https://todo.sr.ht/~aw/mygit)

@@ -511,7 +511,7 @@ impl RepoCommitTemplate<'_> {
         for branch in branches {
             // branch is not a reference, just a fancy name for a commit
             html += &format!(
-                r#" <a href="/{0}/commit/{1}" class="badge branch">{1}</a>"#,
+                r#" <a href="/{0}/log/{1}" class="badge branch">{1}</a>"#,
                 filters::repo_name(self.repo).unwrap(),
                 branch.name().unwrap().unwrap(),
             );

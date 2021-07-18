@@ -6,5 +6,6 @@
   {% include "repo-navbar.html" %}
   <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}/raw/{{path.display()}}" style="float:right;">raw</a>
   <h3>{{path.display()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
+  {% include "last-commit.html" %}
   {{file_text|safe}}
 {% endblock %}

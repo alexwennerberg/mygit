@@ -416,6 +416,59 @@ async fn repo_refs(req: Request<()>) -> tide::Result {
     Ok(tmpl.into())
 }
 
+fn last_commit_for<'a, S: git2::IntoCString>(
+    repo: &'a Repository,
+    spec: &str,
+    path: S,
+) -> Commit<'a> {
+    let mut revwalk = repo.revwalk().unwrap();
+    revwalk
+        .push(
+            repo
+                // we already know this has to be a commit-ish
+                .revparse_single(spec)
+                .unwrap()
+                .peel_to_commit()
+                .unwrap()
+                .id(),
+        )
+        .unwrap();
+    revwalk.set_sorting(git2::Sort::TIME).unwrap();
+
+    let mut options = DiffOptions::new();
+    options.pathspec(path);
+
+    revwalk
+        .filter_map(|oid| repo.find_commit(oid.unwrap()).ok()) // TODO error handling
+        .filter(|commit| {
+            let tree = commit.tree().unwrap();
+            if commit.parent_count() == 0 {
+                repo.diff_tree_to_tree(None, Some(&tree), Some(&mut options))
+                    .unwrap()
+                    .stats()
+                    .unwrap()
+                    .files_changed()
+                    > 0
+            } else {
+                // check that the given file was affected from any of the parents
+                commit.parents().any(|parent| {
+                    repo.diff_tree_to_tree(
+                        parent.tree().ok().as_ref(),
+                        Some(&tree),
+                        Some(&mut options),
+                    )
+                    .unwrap()
+                    .stats()
+                    .unwrap()
+                    .files_changed()
+                        > 0
+                })
+            }
+        })
+        .next()
+        .expect("file was not part of any commit")
+}
+
 #[derive(Template)]
 #[template(path = "tree.html")] // using the template in this path, relative
 struct RepoTreeTemplate<'a> {
@@ -423,6 +476,7 @@ struct RepoTreeTemplate<'a> {
     tree: Tree<'a>,
     path: &'a Path,
     spec: &'a str,
+    last_commit: Commit<'a>,
 }
 
 async fn repo_tree(req: Request<()>) -> tide::Result {
@@ -443,6 +497,7 @@ async fn repo_tree(req: Request<()>) -> tide::Result {
         tree,
         path: Path::new(""),
         spec,
+        last_commit: last_commit_for(&repo, spec, ""),
     };
     Ok(tmpl.into())
 }
@@ -593,6 +648,7 @@ struct RepoFileTemplate<'a> {
     path: &'a Path,
     file_text: &'a str,
     spec: &'a str,
+    last_commit: Commit<'a>,
 }
 
 async fn repo_file(req: Request<()>) -> tide::Result {
@@ -604,6 +660,8 @@ async fn repo_file(req: Request<()>) -> tide::Result {
 
     let path = Path::new(req.param("object_name")?);
     let tree_entry = tree.get_path(path).unwrap();
+
+    let last_commit = last_commit_for(&repo, spec, path);
 
     // TODO make sure I am escaping html properly here
     // TODO allow disabling of syntax highlighting
@@ -622,6 +680,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
             tree,
             path,
             spec: &spec,
+            last_commit,
         }
         .into(),
         // this is not a subtree, so it should be a blob i.e. file
@@ -691,6 +750,7 @@ async fn repo_file(req: Request<()>) -> tide::Result {
                 path,
                 file_text: &output,
                 spec: &spec,
+                last_commit,
             }
             .into()
         }

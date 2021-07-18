@@ -9,14 +9,8 @@
   {% endif %}
   <h3>{{branch}}</h3>
   <table>
-  {% for commit in commits %} 
-  <tr>
-    <td><a href="/{{repo|repo_name|urlencode_strict}}/commit/{{commit.id()}}" class="commit-hash">{{commit|short_id}}</a></td>
-    {% let summary = commit.summary().unwrap_or("")|truncate(72) %}
-    <td class="commit-summary">{{summary}}</td>
-    <td class="commit-author-email">{{commit.author()|signature_email_link|safe}}</td>
-    <td class="commit-date">{{commit.time()|format_datetime("%Y-%m-%d")}}</td>
-  </tr>
+  {% for commit in commits %}
+    {% include "commit-tr.html" %}
   {% endfor %}
   </table>
   {% if next_page.is_some() %}

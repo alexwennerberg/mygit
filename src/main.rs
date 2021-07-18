@@ -123,7 +123,6 @@ async fn index(req: Request<()>) -> tide::Result {
         let query = query
             .split(";")
             .map(|s| {
-                println!("{}", s);
                 let mut parts = s.splitn(2, "=");
                 (parts.next().unwrap(), parts.next().unwrap())
             })
@@ -620,7 +619,6 @@ async fn repo_file(req: Request<()>) -> tide::Result {
                         http::mime::PLAIN
                     }
                 });
-                println!("{}", mime);
                 match mime.basetype() {
                     "text" => unreachable!("git detected this file as binary"),
                     "image" => format!(
@@ -683,7 +681,6 @@ async fn repo_file(req: Request<()>) -> tide::Result {
 }
 
 async fn repo_file_raw(req: Request<()>) -> tide::Result {
-    println!("hey");
     let repo = repo_from_request(req.param("repo_name")?)?;
 
     let spec = req.param("ref").unwrap();

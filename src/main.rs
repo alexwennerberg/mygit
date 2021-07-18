@@ -479,29 +479,6 @@ struct RepoTreeTemplate<'a> {
     last_commit: Commit<'a>,
 }
 
-async fn repo_tree(req: Request<()>) -> tide::Result {
-    let repo = repo_from_request(&req.param("repo_name")?)?;
-    if repo.is_empty().unwrap() {
-        // redirect to start page of repo
-        let mut url = req.url().clone();
-        url.path_segments_mut().unwrap().pop();
-        return Ok(tide::Redirect::temporary(url.to_string()).into());
-    }
-
-    let head = repo.head()?;
-    let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
-    let commit = repo.revparse_single(spec)?.peel_to_commit()?;
-    let tree = commit.tree()?;
-    let tmpl = RepoTreeTemplate {
-        repo: &repo,
-        tree,
-        path: Path::new(""),
-        spec,
-        last_commit: last_commit_for(&repo, spec, ""),
-    };
-    Ok(tmpl.into())
-}
-
 #[derive(Template)]
 #[template(path = "commit.html")] // using the template in this path, relative
 struct RepoCommitTemplate<'a> {
@@ -654,26 +631,30 @@ struct RepoFileTemplate<'a> {
 async fn repo_file(req: Request<()>) -> tide::Result {
     let repo = repo_from_request(req.param("repo_name")?)?;
 
-    let spec = req.param("ref").unwrap();
+    if repo.is_empty().unwrap() {
+        // redirect to start page of repo
+        let mut url = req.url().clone();
+        url.path_segments_mut().unwrap().pop();
+        return Ok(tide::Redirect::temporary(url.to_string()).into());
+    }
+
+    let spec = req.param("ref").unwrap_or("HEAD");
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
 
-    let path = Path::new(req.param("object_name")?);
-    let tree_entry = tree.get_path(path).unwrap();
+    let (path, tree_obj) = if let Ok(path) = req.param("object_name") {
+        let path = Path::new(path);
+        (path, tree.get_path(&path)?.to_object(&repo)?)
+    } else {
+        (Path::new(""), tree.into_object())
+    };
 
     let last_commit = last_commit_for(&repo, spec, path);
 
     // TODO make sure I am escaping html properly here
     // TODO allow disabling of syntax highlighting
     // TODO -- dont pull in memory, use iterators if possible
-    let extension = path
-        .extension()
-        .and_then(std::ffi::OsStr::to_str)
-        .unwrap_or_default();
-    let syntax = SYNTAXES
-        .find_syntax_by_extension(extension)
-        .unwrap_or_else(|| SYNTAXES.find_syntax_plain_text());
-    let tmpl = match tree_entry.to_object(&repo)?.into_tree() {
+    let tmpl = match tree_obj.into_tree() {
         // this is a subtree
         Ok(tree) => RepoTreeTemplate {
             repo: &repo,
@@ -685,6 +666,14 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         .into(),
         // this is not a subtree, so it should be a blob i.e. file
         Err(tree_obj) => {
+            let extension = path
+                .extension()
+                .and_then(std::ffi::OsStr::to_str)
+                .unwrap_or_default();
+            let syntax = SYNTAXES
+                .find_syntax_by_extension(extension)
+                .unwrap_or_else(|| SYNTAXES.find_syntax_plain_text());
+
             let blob = tree_obj.as_blob().unwrap();
             let output = if blob.is_binary() {
                 // this is not a text file, but try to serve the file if the MIME type
@@ -1078,10 +1067,10 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/:repo_name/log/:ref/*object_name").get(repo_log);
     app.at("/:repo_name/log.xml").get(repo_log_feed);
     app.at("/:repo_name/log/:ref/feed.xml").get(repo_log_feed); // ref is optional
-    app.at("/:repo_name/tree").get(repo_tree);
-    app.at("/:repo_name/tree/").get(repo_tree);
-    app.at("/:repo_name/tree/:ref").get(repo_tree); // ref is optional
-    app.at("/:repo_name/tree/:ref/").get(repo_tree); // ref is optional
+    app.at("/:repo_name/tree").get(repo_file);
+    app.at("/:repo_name/tree/").get(repo_file);
+    app.at("/:repo_name/tree/:ref").get(repo_file); // ref is optional
+    app.at("/:repo_name/tree/:ref/").get(repo_file); // ref is optional
     app.at("/:repo_name/tree/:ref/item/*object_name")
         .get(repo_file);
     app.at("/:repo_name/tree/:ref/raw/*object_name")

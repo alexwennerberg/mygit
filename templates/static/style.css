@@ -88,6 +88,10 @@ table.core {
 	padding: .2em;
 }
 
+.commit-summary {
+	width: 100%;
+}
+
 @media only screen and (max-width: 600px) {
     body {
         font-size: 16px;

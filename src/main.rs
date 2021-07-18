@@ -638,7 +638,8 @@ async fn repo_file(req: Request<()>) -> tide::Result {
         return Ok(tide::Redirect::temporary(url.to_string()).into());
     }
 
-    let spec = req.param("ref").unwrap_or("HEAD");
+    let head = repo.head()?;
+    let spec = req.param("ref").ok().or_else(|| head.shorthand()).unwrap();
     let commit = repo.revparse_single(spec)?.peel_to_commit()?;
     let tree = commit.tree()?;
 

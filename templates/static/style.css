@@ -134,7 +134,10 @@ Light is the default color scheme, not using a media query for browser support.
     color: #445050; /* SolAArized emphasis-light */
 }
 
-body, .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js, .punctuation.definition.string {
+body {
+	color: black;
+}
+.code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js, .punctuation.definition.string {
     color: #4f5f5f; /* SolAArized main-light */
 }
 
@@ -147,11 +150,11 @@ hr.thin {
 }
 
 :target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
-    background-color: #eee8d5; /* SolAArized background-highlight-light */
+    background-color: white; /* SolAArized background-highlight-light */
 }
 
 body, .code {
-    background-color: #fdf6e3; /* SolAArized background-light */
+    background-color: white; /* SolAArized background-light */
 }
 
 .variable.function, .keyword.control.class, .entity.name, .entity.name.class, .entity.name.type.class, .entity.other.attribute-name, .entity.name.function, .constant, .constant.language, .meta.preprocessor, .support.constant.color, .invalid.deprecated.color.w3c-non-standard-color-name.scss, .entity.name.tag.css, .entity.name.tag.scss, .source.less, .keyword.control.html.elements, .source.sass, .keyword.control.untitled, .entity.other.attribute-name.class, .entity.other.attribute-name.id, .text.html.basic, .entity.other.attribute-name.html, .meta.tag.xml, .entity.other.attribute-name, .variable.other.constant.ruby, .meta.array, .support.function.construct.php, .meta.group.braces.tex, .string.other.math.tex, .string.other.math.tex, .support.type.exception.python, .markup.heading, .punctuation.definition.heading.markdown, .markup.changed.git_gutter {
@@ -215,11 +218,11 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
     }
 
     :target, tr:hover, .navbar, .meta.paragraph.markdown, .meta.dummy.line-break, #diff {
-        background-color: #003a44; /* SolAArized background-highdark-dark */
+        background-color: black; /* SolAArized background-highdark-dark */
     }
 
     body, .code {
-        background-color: #002b36; /* SolAArized background-dark */
+        background-color: black; /* SolAArized background-dark */
     }
 
     .variable.function, .keyword.control.class, .entity.name, .entity.name.class, .entity.name.type.class, .entity.other.attribute-name, .entity.name.function, .constant, .constant.language, .meta.preprocessor, .support.constant.color, .invalid.deprecated.color.w3c-non-standard-color-name.scss, .entity.name.tag.css, .entity.name.tag.scss, .source.less, .keyword.control.html.elements, .source.sass, .keyword.control.untitled, .entity.other.attribute-name.class, .entity.other.attribute-name.id, .text.html.basic, .entity.other.attribute-name.html, .meta.tag.xml, .entity.other.attribute-name, .variable.other.constant.ruby, .meta.array, .support.function.construct.php, .meta.group.braces.tex, .string.other.math.tex, .string.other.math.tex, .support.type.exception.python, .markup.heading, .punctuation.definition.heading.markdown, .markup.changed.git_gutter {

@@ -60,6 +60,11 @@ h1, h2, h3 {
      margin: 0;
 }
 
+h3 {
+    display: inline-block;
+    margin-right: 2em;
+}
+
 pre {
     line-height: 1.2;
     font-size: 1rem;
@@ -85,11 +90,15 @@ table.core {
 }
 
 .badge {
-	padding: .2em;
+    padding: .2em;
 }
 
 .commit-summary {
-	width: 100%;
+    width: 100%;
+}
+
+a.feed>img {
+    height: 1em;
 }
 
 @media only screen and (max-width: 600px) {

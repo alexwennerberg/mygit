@@ -2,9 +2,11 @@
 
 {% block title %}{{repo|repo_name}} refs - {{crate::CONFIG.site_name}}{% endblock %}
 
+{% block head %}<link rel="alternate" type="application/rss+xml" title="{{repo|repo_name}} tags" href="refs.xml">{% endblock %}
+
 {% block content %}
   {% include "repo-navbar.html" %}
-  <h2>Branches</h2>
+  <h3>Branches</h3>
   <table>
   {% for branch in branches %}
   <tr>
@@ -14,7 +16,8 @@
   </tr>
   {% endfor %}
   </table>
-  <h2>Tags</h2>
+  <h3>Tags</h3>
+  <a href="log.xml" class="feed"><img src="/Feed-icon.svg" alt="RSS feed icon"/></a>
   <table>
   {% for (link, tag, signature) in tags %}
     <tr>

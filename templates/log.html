@@ -2,12 +2,15 @@
 
 {% block title %}{{repo|repo_name}} log at {{branch}} - {{crate::CONFIG.site_name}}{% endblock %}
 
+{% block head %}<link rel="alternate" type="application/rss+xml" title="{{repo|repo_name}} {{branch}} commits" href="log.xml">{% endblock %}
+
 {% block content %}
   {% include "repo-navbar.html" %}
-  {% if next_page.is_some() %}
-  <a href="{{next_page.as_ref().unwrap()}}" style="float:right;">older commits &rarr;</a>
-  {% endif %}
   <h3>{{branch}}</h3>
+  <a href="log.xml" class="feed"><img src="/Feed-icon.svg" alt="RSS feed icon"/></a>
+  {% if next_page.is_some() %}
+  <a href="{{next_page.as_ref().unwrap()}}">older commits &rarr;</a>
+  {% endif %}
   <table>
   {% for commit in commits %}
     {% include "commit-tr.html" %}

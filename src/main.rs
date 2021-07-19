@@ -832,6 +832,10 @@ async fn static_resource(req: Request<()>) -> tide::Result {
             File::open("templates/static/robots.txt").unwrap(),
             http::mime::PLAIN,
         )),
+        "/Feed-icon.svg" => Some((
+            File::open("templates/static/Feed-icon.svg").unwrap(),
+            http::mime::SVG,
+        )),
         _ => None,
     };
 
@@ -1043,6 +1047,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     app.at("/style.css").get(static_resource);
     app.at("/robots.txt").get(static_resource);
+    app.at("/Feed-icon.svg").get(static_resource);
 
     // Raw files, patch files
     app.at("/mail").get(mail::list_threads);

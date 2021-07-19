@@ -4,7 +4,7 @@
 
 {% block content %}
   {% include "repo-navbar.html" %}
-  <h3 style="display:inline-block;">{{path.display()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
+  <h3>{{path.display()}}@<a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}">{{spec}}</a></h3>
   <a href="/{{repo|repo_name|urlencode_strict}}/tree/{{spec}}/raw/{{path.display()}}">raw</a>
   {% include "last-commit.html" %}
   {{file_text|safe}}

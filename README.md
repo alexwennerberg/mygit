@@ -1,5 +1,5 @@
 # mygit
-Simple self-hosted git, written in Rust
+Simple self-hosted git server, written in Rust
 
 Lighter weight than [gitea](https://gitea.io/en-us/), more modern than [cgit](https://git.zx2c4.com/cgit/) or [gitweb](https://git-scm.com/book/en/v2/Git-on-the-Server-GitWeb). For people who want to run a git server themselves, rather than depending on someone else, but don't want to put too much work into it.
 

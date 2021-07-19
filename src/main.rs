@@ -175,7 +175,7 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
         .decode_utf8_lossy()
         .into_owned();
 
-    let repo_path = Path::new(&CONFIG.projectroot).join(repo_name);
+    let repo_path = Path::new(&CONFIG.projectroot).join(repo_name).canonicalize()?;
 
     // prevent path traversal
     if !repo_path.starts_with(&CONFIG.projectroot) {
@@ -730,7 +730,7 @@ async fn git_data(req: Request<()>) -> tide::Result {
         .path()
         .strip_prefix(&format!("/{}/", req.param("repo_name").unwrap()))
         .unwrap_or_default();
-    let path = repo.path().join(path);
+    let path = repo.path().join(path).canonicalize()?;
 
     if !path.starts_with(repo.path()) {
         // that path got us outside of the repository structure somehow

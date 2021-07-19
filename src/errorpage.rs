@@ -25,10 +25,15 @@ impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpag
                 // - RFC 7231 § 4.3.2
                 response.take_body();
             } else {
+                let message = match status {
+                    // don't expose 500 error
+                    StatusCode::InternalServerError =>  "Internal Server Error".to_owned(),
+                    _ => err.into_inner().to_string(),
+                };
                 response = ErrorTemplate {
                     resource,
                     status,
-                    message: err.into_inner().to_string(),
+                    message: message
                 }
                 .into();
                 response.set_status(status);

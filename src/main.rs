@@ -16,7 +16,6 @@ use tide::{http, Request, Response};
 
 mod errorpage;
 mod filters;
-mod mail;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
@@ -1048,9 +1047,6 @@ async fn main() -> Result<(), std::io::Error> {
     app.at("/style.css").get(static_resource);
     app.at("/robots.txt").get(static_resource);
     app.at("/Feed-icon.svg").get(static_resource);
-
-    // Raw files, patch files
-    app.at("/mail").get(mail::list_threads);
 
     app.at("/:repo_name").get(repo_home);
     app.at("/:repo_name/").get(repo_home);

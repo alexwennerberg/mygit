@@ -15,7 +15,6 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 async-trait = "0.1.48"
 chrono = "0.4"
 git2 = { version="0.13", default-features = false }
-mailparse = "0.13"
 once_cell = "1.7.2"
 percent-encoding = "2.1"
 pico-args = "0.4"

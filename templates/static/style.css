@@ -22,6 +22,8 @@ table { border-spacing: 0.5em 0.1em; }
 
 .repo-last-updated {
     font-style: italic;
+    /* so digits of the dates are aligned */
+    font-variant-numeric: tabular-nums;
 }
 
 .repo-link, .git-reference, .permissions, .commit-hash, .filename, .filesize, .commit-message{

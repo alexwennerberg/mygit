@@ -10,8 +10,6 @@ body {
 
 body > hr { margin-left: -1ch; }
 
-table { width: 100% }
-
 table { border-spacing: 0.5em 0.1em; }
 
 .clone-url { font-size: 0.9em; }

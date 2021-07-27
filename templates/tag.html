@@ -12,6 +12,6 @@
   <b>Date:</b> {{tag.tagger().unwrap().when()|format_datetime("%c %z")}}
   <br>
   {% endif %}
-  <hr class="thin"/>
+  <hr/>
   <pre class="commit-message">{{tag.message().unwrap()}}</pre>
 {% endblock %}

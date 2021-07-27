@@ -8,13 +8,22 @@ body {
     line-height: 1.5;
 }
 
-body > hr { margin-left: -1ch; }
+hr {
+    margin-left: -1ch;
+    margin-right: -1ch;
+    border: 0;
+    height: 0;
+    border-top: 1px solid;
+}
 
-table { border-spacing: 0.5em 0.1em; }
+table {
+    border-spacing: 0.5em 0.1em;
+}
 
-.clone-url { font-size: 0.9em; }
-
-.clone-url { float: right; }
+.clone-url {
+    font-size: 0.9em;
+    float: right;
+}
 
 .readme {
     max-width: 80ch;
@@ -58,12 +67,6 @@ a.line {
     font-family: "Roboto Mono", monospace;
     -webkit-user-select: all; /* Safari */
     user-select: all; /* Standard syntax */
-}
-
-hr.thin {
-    border: 0;
-    height: 0;
-    border-top: 1px solid;
 }
 
 h1, h2, h3 {
@@ -147,11 +150,12 @@ Light is the default color scheme, not using a media query for browser support.
 body {
 	color: black;
 }
+
 .code, .keyword.operator.comparison, .keyword.operator.assignment, .keyword.operator.arithmetic, .meta.brace.round, .meta.brace.curly, .punctuation.section, .punctuation.section.block, .punctuation.definition.parameters, .punctuation.section.group, .meta.selector.css, .text.html.basic, .meta.tag.other.html, .text.html.basic, .meta.tag.any.html, .text.html.basic, .meta.tag.block.any, .text.html.basic, .meta.tag.inline.any, .text.html.basic, .meta.tag.structure.any.html, .text.html.basic, .source.js.embedded.html, .punctuation.separator.key-value.html, .variable.other.readwrite.js, .variable.other.object.js, .variable.other.constant.js, .punctuation.definition.string {
     color: #4f5f5f; /* SolAArized main-light */
 }
 
-hr.thin {
+hr {
     border-top-color: #4f5f5f; /* SolAArized main-light */
 }
 
@@ -219,7 +223,7 @@ a, .variable, .entity.other.inherited-class, .entity.name.tag, .storage.type, .m
         color: #919ea1; /* SolAArized main-dark */
     }
 
-    hr.thin {
+    hr {
         border-top-color: #919ea1; /* SolAArized main-dark */
     }
 

@@ -3,7 +3,7 @@ use git2::{Commit, Repository, Signature, Time};
 pub fn format_datetime(time: &Time, format: &str) -> askama::Result<String> {
     use chrono::{FixedOffset, TimeZone};
 
-    let offset = FixedOffset::west(time.offset_minutes() * 60);
+    let offset = FixedOffset::east(time.offset_minutes() * 60);
     let datetime = offset.timestamp(time.seconds(), 0);
     Ok(datetime.format(format).to_string())
 }

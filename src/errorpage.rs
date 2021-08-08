@@ -27,13 +27,15 @@ impl<State: Clone + Send + Sync + 'static> Middleware<State> for ErrorToErrorpag
             } else {
                 let message = match status {
                     // don't expose 500 error
-                    StatusCode::InternalServerError if !cfg!(debug_assertions) =>  "Internal Server Error".to_owned(),
+                    StatusCode::InternalServerError if !cfg!(debug_assertions) => {
+                        "Internal Server Error".to_owned()
+                    }
                     _ => err.into_inner().to_string(),
                 };
                 response = ErrorTemplate {
                     resource,
                     status,
-                    message: message
+                    message,
                 }
                 .into();
                 response.set_status(status);

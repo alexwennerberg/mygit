@@ -173,7 +173,9 @@ fn repo_from_request(repo_name: &str) -> Result<Repository, tide::Error> {
         .decode_utf8_lossy()
         .into_owned();
 
-    let repo_path = Path::new(&CONFIG.projectroot).join(repo_name).canonicalize()?;
+    let repo_path = Path::new(&CONFIG.projectroot)
+        .join(repo_name)
+        .canonicalize()?;
 
     // prevent path traversal
     if !repo_path.starts_with(&CONFIG.projectroot) {

@@ -1,4 +1,7 @@
 # mygit
+
+NOTE: This project is not actively developed. I decided to use cgit instead.
+
 Simple self-hosted git server, written in Rust
 
 Lighter weight than [gitea](https://gitea.io/en-us/), more modern than
@@ -6,8 +9,6 @@ Lighter weight than [gitea](https://gitea.io/en-us/), more modern than
 [gitweb](https://git-scm.com/book/en/v2/Git-on-the-Server-GitWeb). For people
 who want to run a git server themselves, rather than depending on someone else,
 but don't want to put too much work into it.
-
-Live demo at [https://git.alexwennerberg.com](https://git.alexwennerberg.com)
 
 ## Deploying
 Build your binary with `cargo build --release`. Then probably move it somewhere
